@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-10 16:48:21
+ * @LastEditTime: 2022-04-10 16:53:00
  */
 #include <windows.h>  // Sleep
 #include <iostream>
@@ -193,8 +193,10 @@ void debug_input() {
 void debug_analyMinSupportNum() {
     cerr << "Debug: Please continue input minsupport and I will show you the result" << endl;
     string s;
+    database = {{1, 2}, {1}, {2}, {1}};
     while (cin >> s) {
         analyMinSupportNum(s);
+        printf("minSupportNum = %d, minSupport = %lf%%\n", minSupportNum, double(minSupportNum) * 100 / ((int)database.size()));
         printf("minSupportNum - 1 = %d, minSupport_1 = %lf%%\n", minSupportNum - 1, double(minSupportNum - 1) * 100 / ((int)database.size()));
         minSupportNum = 0;
     }
