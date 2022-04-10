@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-10 20:57:42
+ * @LastEditTime: 2022-04-10 21:09:06
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -24,27 +24,21 @@ int minSupportNum = 0;  // 最小支持度
 vector<pair<vector<int>, int>> database;  // 数据库(内存版本) [<[itemNum, ...], appendTime>, ...]
 map<int, int> appendTime;  // 某个数据库中，每个item出现过的总次数
 
+
 class Node {
 public:
     int thisItem;
     int count;
     map<int, Node*> childs;
+    Node* next = nullptr;
     Node() {};
     Node(int num, int thisAppendTime = 1) : thisItem(num), count(thisAppendTime) {};
     ~Node() {delete this;};
-    Node* addChild(int num, int thisAppendTime = 1) {
-        if (childs.count(num)) {
-            Node* child = childs[num];
-            child->count += thisAppendTime;
-            return child;
-        }
-        else {
-            Node* child = new Node(num, thisAppendTime);
-            childs[num] = child;
-            return child;
-        }
-    }
+    Node* addChild(int num, int thisAppendTime = 1);
 };
+
+
+map<int, Node*> tableHead;  // 头表
 
 
 void init(int argc, char** argv);
@@ -56,6 +50,22 @@ void analyze();
 void countAppendTime();
 Node* buildTree();
 bool cmp(int itemA, int itemB);
+Node* Node::addChild(int num, int thisAppendTime) {
+    if (childs.count(num)) {
+        Node* child = childs[num];
+        child->count += thisAppendTime;
+        return child;
+    }
+    else {
+        Node* child = new Node(num, thisAppendTime);
+        if (tableHead.count(num)) {
+            tableHead[num]->next = child;
+        }
+        tableHead[num] = child;
+        childs[num] = child;
+        return child;
+    }
+}
 
 
 /**
