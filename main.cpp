@@ -2,14 +2,16 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-10 16:53:00
+ * @LastEditTime: 2022-04-10 20:57:42
  */
 #include <windows.h>  // Sleep
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <istream>  // getline
 #include <cstring>
 #include <vector>
+#include <map>
 using namespace std;
 #define dbg(x) cout << #x << " = " << x << endl
 
@@ -19,7 +21,30 @@ using namespace std;
 
 string dataName;  // 输入文件名
 int minSupportNum = 0;  // 最小支持度
-vector<vector<int>> database;  // 数据库(内存版本)
+vector<pair<vector<int>, int>> database;  // 数据库(内存版本) [<[itemNum, ...], appendTime>, ...]
+map<int, int> appendTime;  // 某个数据库中，每个item出现过的总次数
+
+class Node {
+public:
+    int thisItem;
+    int count;
+    map<int, Node*> childs;
+    Node() {};
+    Node(int num, int thisAppendTime = 1) : thisItem(num), count(thisAppendTime) {};
+    ~Node() {delete this;};
+    Node* addChild(int num, int thisAppendTime = 1) {
+        if (childs.count(num)) {
+            Node* child = childs[num];
+            child->count += thisAppendTime;
+            return child;
+        }
+        else {
+            Node* child = new Node(num, thisAppendTime);
+            childs[num] = child;
+            return child;
+        }
+    }
+};
 
 
 void init(int argc, char** argv);
@@ -27,6 +52,10 @@ void input();
 void debug_input();
 void analyMinSupportNum(string minSupportInput);
 void debug_analyMinSupportNum();
+void analyze();
+void countAppendTime();
+Node* buildTree();
+bool cmp(int itemA, int itemB);
 
 
 /**
@@ -93,7 +122,7 @@ void input() {  // 读入数据
         }
         if (lastIsNum)
             thisLog.push_back(num);
-        database.push_back(thisLog);
+        database.push_back({thisLog, 1});
     }
     istr.close();
 }
@@ -171,20 +200,62 @@ void analyMinSupportNum(string minSupportInput) {
     }
 }
 
+/* 进行挖掘 */
+void analyze() {
+    countAppendTime();
+    buildTree();
+}
+
+/* (vector<vector<int>>) database -> (map<int, int>) appendTime */
+void countAppendTime() {
+    appendTime.clear();
+    for (auto [thisLog, thisAppendTime] : database)  {
+        for (int& t : thisLog) {
+            appendTime[t] += thisAppendTime;
+        }
+    }
+}
+
+/* 建树并返回root */
+Node* buildTree() {
+    Node* root = new Node();
+    for (auto [thisLog, thisAppendTime] : database) {
+        sort(thisLog.begin(), thisLog.end(), cmp);
+        Node* node = root;
+        for (int& thisItem : thisLog) {
+            if (appendTime[thisItem] < minSupportNum)
+                break;
+            node = node->addChild(thisItem, thisAppendTime);
+        }
+    }
+    return root;
+}
+
+/* 根据商品出现次数排序 */
+bool cmp(int itemA, int itemB) {
+    int appendTimeDiff = appendTime[itemA] - appendTime[itemB];
+    if (!appendTimeDiff) {  // 二者出现次数相同
+        return itemA < itemB;  // 小的itemId优先
+    }
+    return appendTimeDiff > 0;  // 出现次数大的在前
+}
+
 /* Debug: 输出database(vector<vector<int>>) */
 void debug_input() {
     puts("database:");
     puts("------------------");
-    for (vector<int>& thisLog : database) {
-        bool first = true;
-        for (int& t : thisLog) {
-            if (first)
-                first = false;
-            else
-                putchar(' ');
-            cout << t;
+    for (auto [thisLog, thisAppendTime] : database) {
+        while (thisAppendTime--) {
+            bool first = true;
+            for (int& t : thisLog) {
+                if (first)
+                    first = false;
+                else
+                    putchar(' ');
+                cout << t;
+            }
+            puts("");
         }
-        puts("");
     }
     puts("------------------");
 }
@@ -193,7 +264,7 @@ void debug_input() {
 void debug_analyMinSupportNum() {
     cerr << "Debug: Please continue input minsupport and I will show you the result" << endl;
     string s;
-    database = {{1, 2}, {1}, {2}, {1}};
+    database = {{{1, 2}, 1}, {{1}, 1}, {{2}, 1}, {{1}, 1}};
     while (cin >> s) {
         analyMinSupportNum(s);
         printf("minSupportNum = %d, minSupport = %lf%%\n", minSupportNum, double(minSupportNum) * 100 / ((int)database.size()));
@@ -204,7 +275,7 @@ void debug_analyMinSupportNum() {
 }
 
 int main(int argc, char** argv) {
-    debug_analyMinSupportNum();
     init(argc, argv);
+    analyze();
     return 0;
 }
