@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-10 15:51:21
+ * @LastEditTime: 2022-04-10 15:53:30
  */
 #include <windows.h>  // Sleep
 #include <iostream>
@@ -90,6 +90,8 @@ void input() {  // 读入数据
                 lastIsNum = false;
             }
         }
+        if (lastIsNum)
+            thisLog.push_back(num);
         database.push_back(thisLog);
     }
     istr.close();
