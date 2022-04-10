@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-10 16:36:09
+ * @LastEditTime: 2022-04-10 16:48:21
  */
 #include <windows.h>  // Sleep
 #include <iostream>
@@ -140,6 +140,7 @@ void analyMinSupportNum(string minSupportInput) {
                 return false;
             if (minSupportInput[0] == '.')
                 return false;
+            return true;
         };
         if (!ifOkDot())
             SlowExit("[6]: Illegal % position|num.", 6);
@@ -164,6 +165,9 @@ void analyMinSupportNum(string minSupportInput) {
                 SlowExit("[7]: Illegal character in '%-method'", 7);
             }
         }
+        minSupportNum = percent * ((int)database.size()) / 100;
+        if ((double)minSupportNum * 100 /  ((int)database.size()) < percent)
+            minSupportNum++;
     }
 }
 
@@ -185,7 +189,20 @@ void debug_input() {
     puts("------------------");
 }
 
+/* Debug: (请将此函数放在main开头)输入一个代表最小支持度的参数并输出转换结果(并结束程序) */
+void debug_analyMinSupportNum() {
+    cerr << "Debug: Please continue input minsupport and I will show you the result" << endl;
+    string s;
+    while (cin >> s) {
+        analyMinSupportNum(s);
+        printf("minSupportNum - 1 = %d, minSupport_1 = %lf%%\n", minSupportNum - 1, double(minSupportNum - 1) * 100 / ((int)database.size()));
+        minSupportNum = 0;
+    }
+    exit(0);
+}
+
 int main(int argc, char** argv) {
+    debug_analyMinSupportNum();
     init(argc, argv);
     return 0;
 }
