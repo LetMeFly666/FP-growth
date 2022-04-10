@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-10 15:53:30
+ * @LastEditTime: 2022-04-10 16:36:09
  */
 #include <windows.h>  // Sleep
 #include <iostream>
@@ -13,8 +13,8 @@
 using namespace std;
 #define dbg(x) cout << #x << " = " << x << endl
 
-#define EXIT1IFNOANOTHERPARAMETR if (i + 1 >= argc) exit(1)  // 如果参数个数不足就exit(1)
-#define SlowExit(toSay, errCode) {cerr << toSay << endl; Sleep(500); exit(errCode);}
+#define SlowExit(toSay, errCode) {cerr << toSay << endl; Sleep(725); exit(errCode);}
+#define EXIT1IFNOANOTHERPARAMETR if (i + 1 >= argc) SlowExit("[0]: Parameter not enough", 1)  // 如果参数个数不足就exit(1)
 
 
 string dataName;  // 输入文件名
@@ -26,6 +26,7 @@ void init(int argc, char** argv);
 void input();
 void debug_input();
 void analyMinSupportNum(string minSupportInput);
+void debug_analyMinSupportNum();
 
 
 /**
@@ -68,7 +69,7 @@ void init(int argc, char** argv) {
 void input() {  // 读入数据
     ifstream istr(dataName.c_str(), ios::in);
     if (istr.fail()) {
-        SlowExit("Open input file failed.", 2);
+        SlowExit("[2]: Open input file failed.", 2);
     }
     string line;
     int cnt = 0;
@@ -99,7 +100,71 @@ void input() {  // 读入数据
 
 /* 将输入的最小支持度(string)转为最小支持数(int) */
 void analyMinSupportNum(string minSupportInput) {
-
+    /* “%”是否在minSupportInput中 */
+    auto isPercentInStr = [&minSupportInput]() {
+        for (const char& c : minSupportInput) {
+            if (c == '%')
+                return true;
+        }
+        return false;
+    };
+    if (!isPercentInStr()) {  // 只能出现纯数字[0-9]
+        if (minSupportInput.empty()) {
+            SlowExit("[4]: Please input the min support instand of nothin.", 4);
+        }
+        for (char& c : minSupportInput) {
+            if (c >= '0' && c <= '9') {
+                minSupportNum *= 10;
+                minSupportNum += c - '0';
+            }
+            else {
+                SlowExit("[3]: Please input a positive num if unusing '%-method'.", 3);
+            }
+        }
+    }
+    else {  // 以%结尾，前面由数字和至多一个'.'组成。若包含'.'，则'.'后可以无数字(1. 等价于 1.0)，但'.'前面不可以有数字
+        for (int i = 0; i < minSupportInput.size(); i++) {
+            if (minSupportInput[i] == '%' && i != minSupportInput.size() - 1)
+                SlowExit("[5]: Illegal % position", 5);
+            // if (i == minSupportInput.size() - 1 && minSupportInput[i] != '%')
+            //     SlowExit("[5]: Illegal % position", 5);
+        }
+        auto ifOkDot = [&minSupportInput]() {
+            int cntDots = 0;
+            for (char& c : minSupportInput) {
+                cntDots += c == '.';
+            }
+            if (!cntDots)
+                return true;
+            if (cntDots > 1)
+                return false;
+            if (minSupportInput[0] == '.')
+                return false;
+        };
+        if (!ifOkDot())
+            SlowExit("[6]: Illegal % position|num.", 6);
+        double percent = 0;
+        bool alreadyDot = false;
+        double k = 1;  // 1/10, 1/100, ...
+        for (char& c : minSupportInput) {
+            if (c == '.') {
+                alreadyDot = true;
+            }
+            else if (c >= '0' && c <= '9') {
+                if (alreadyDot) {
+                    k /= 10;
+                    percent += k * (c - '0');
+                }
+                else {
+                    percent *= 10;
+                    percent += c - '0';
+                }
+            }
+            else if (c != '%') {
+                SlowExit("[7]: Illegal character in '%-method'", 7);
+            }
+        }
+    }
 }
 
 /* Debug: 输出database(vector<vector<int>>) */
@@ -122,6 +187,5 @@ void debug_input() {
 
 int main(int argc, char** argv) {
     init(argc, argv);
-    debug_input();
     return 0;
 }
