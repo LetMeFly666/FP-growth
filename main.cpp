@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-12 14:45:08
+ * @LastEditTime: 2022-04-12 15:28:05
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -17,11 +17,12 @@ using namespace std;
 
 #define SlowExit(toSay, errCode) {cerr << toSay << endl; Sleep(725); exit(errCode);}
 #define EXIT1IFNOANOTHERPARAMETR if (i + 1 >= argc) SlowExit("[0]: Parameter not enough", 1)  // 如果参数个数不足就exit(1)
+using Item = int;
 
 
 string dataName;  // 输入文件名
 int minSupportNum = 0;  // 最小支持度
-vector<pair<vector<int>, int>> database;  // 数据库(内存版本) [<[itemNum, ...], appendTime>, ...]
+vector<pair<vector<Item>, int>> database;  // 数据库(内存版本) [<[itemNum, ...], appendTime>, ...]
 
 
 void init(int argc, char** argv);
@@ -75,9 +76,9 @@ void input() {  // 读入数据
     string line;
     int cnt = 0;
     while (getline(istr, line)) {
-        vector<int> thisLog;
+        vector<Item> thisLog;
         bool lastIsNum = false;
-        int num = 0;
+        Item num = 0;
         for (char& c : line) {
             if (c >= '0' && c <= '9') {
                 num *= 10;
@@ -208,5 +209,6 @@ void debug_analyMinSupportNum() {
 
 int main(int argc, char** argv) {
     init(argc, argv);
+    
     return 0;
 }
