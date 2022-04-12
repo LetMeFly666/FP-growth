@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:40:57
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-10 16:31:55
+ * @LastEditTime: 2022-04-12 16:14:20
 -->
 # FP-growth
 
@@ -19,7 +19,7 @@ FP-growth算法实现关联规则的数据挖掘
 ## 使用方法
 
 ```bash
-FP-growth[.exe] [-i DATANAME] [-s SUPPORT] [-o RESULT] [-h]
+FP-growth[.exe] [-i DATANAME] [-s SUPPORT] [-o RESULT] [-h] [-p]
 ```
 
 其中```[]```中的内容表示可选。
@@ -32,6 +32,7 @@ FP-growth[.exe] [-i DATANAME] [-s SUPPORT] [-o RESULT] [-h]
 | ```-s``` | ✖ | 最小支持度 | 如果参数中有```-s```，那么程序将会以此参数的下一个参数作为[最小支持度(百分比)](#minSupport)。如```FP-growth -s 1.25%``` |
 | ```-o``` | ✖ | 重定向输出 | 如果参数中有```-o```，那么程序将会重定向输出到下一个参数所代表的文件中。如```FP-growth -o output.txt```。相当于```FP-growth > output.txt```。提示性信息如"请输入数据文件名"不会重定向到该指定文件中。 |
 | ```-h``` | ✖ | 显示帮助 | 如果参数中有```-h```，那么程序将会打开在线帮助文档[https://fp-growth.letmefly.xyz](https://fp-growth.letmefly.xyz)。 |
+| ```-p``` | ✖ | 执行完暂停 | 如果参数中有```-p```，那么程序执行完将不会退出控制台，而是等待一个任意的按键。 |
 
 #### 最小支持度 <a id="minSupport"></a>
 

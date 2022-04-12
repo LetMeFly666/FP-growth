@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-12 15:28:05
+ * @LastEditTime: 2022-04-12 16:54:35
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -17,12 +17,30 @@ using namespace std;
 
 #define SlowExit(toSay, errCode) {cerr << toSay << endl; Sleep(725); exit(errCode);}
 #define EXIT1IFNOANOTHERPARAMETR if (i + 1 >= argc) SlowExit("[0]: Parameter not enough", 1)  // 如果参数个数不足就exit(1)
+
+
 using Item = int;
+using Items = vector<Item>;
+using ItemWithTime = pair<Items, int>;
+using Database = vector<ItemWithTime>;
+using AppendTime = map<Item, int>;
+using FrequentItemsets = vector<ItemWithTime>;
 
 
 string dataName;  // 输入文件名
 int minSupportNum = 0;  // 最小支持度
-vector<pair<vector<Item>, int>> database;  // 数据库(内存版本) [<[itemNum, ...], appendTime>, ...]
+Database database;  // 数据库(内存版本) [<[itemNum, ...], appendTime>, ...]
+FrequentItemsets frequentItemsets;  // 频繁项集 [<[item, ...], appendTime>, ...]
+bool ifPauseBeforeExit = false;  // 程序执行完是否退出
+
+struct Node {
+    Item item;
+    int appendTime;
+    map<Item, Node*> childs;
+    Node* father;
+    Node(Item item, int appendTime = 1) : item(item), appendTime(appendTime) {};
+    Node* addChild(Item item, int appendTime = 1);
+};
 
 
 void init(int argc, char** argv);
@@ -30,6 +48,21 @@ void input();
 void debug_input();
 void analyMinSupportNum(string minSupportInput);
 void debug_analyMinSupportNum();
+void get1Itemset();
+void showResult();
+
+
+Node* Node::addChild(Item item, int appendTime) {
+    Node* newNode;
+    if (!childs.count(item)) {
+        newNode = new Node(item, appendTime);
+    }
+    else {
+        newNode = childs[item];
+        newNode->appendTime += appendTime;
+    }
+    return newNode;
+}
 
 /**
  * 1. 分析命令行参数，未传递参数提示输入
@@ -54,6 +87,9 @@ void init(int argc, char** argv) {
         else if (!strcmp(argv[i], "-h")) {
             system("start https://fp-growth.letmefly.xyz");
         }
+        else if (!strcmp(argv[i], "-p")) {
+            ifPauseBeforeExit = true;
+        }
     }
     if (dataName.empty()) {  // 输入文件
         cerr << "Please input the file name of the database: ";
@@ -76,7 +112,7 @@ void input() {  // 读入数据
     string line;
     int cnt = 0;
     while (getline(istr, line)) {
-        vector<Item> thisLog;
+        Items thisLog;
         bool lastIsNum = false;
         Item num = 0;
         for (char& c : line) {
@@ -173,6 +209,38 @@ void analyMinSupportNum(string minSupportInput) {
     }
 }
 
+/* 根据初始数据库获得频繁一项集 */
+void get1Itemset() {
+    AppendTime appendTime;
+    for (ItemWithTime& transaction : database) {
+        for(Item& item : transaction.first) {
+            appendTime[item] += transaction.second;
+        }
+    }
+    for (AppendTime::iterator it = appendTime.begin(); it != appendTime.end(); it++) {
+        if (it->second >= minSupportNum) {
+            frequentItemsets.push_back({{it->first}, it->second});
+        }
+    }
+}
+
+/* 展示结果 */
+void showResult() {
+    printf("frequent item sets 's size is: %d\n", frequentItemsets.size());
+    for (ItemWithTime& transaction : frequentItemsets) {
+        printf("{");
+        bool firstPrint = true;
+        for (Item& item : transaction.first) {
+            if (firstPrint)
+                firstPrint = false;
+            else
+                printf(", ");
+            printf("%d", item);
+        }
+        printf("} --> %d\n", transaction.second);
+    }
+}
+
 /* Debug: 输出database(vector<vector<int>>) */
 void debug_input() {
     puts("database:");
@@ -209,6 +277,13 @@ void debug_analyMinSupportNum() {
 
 int main(int argc, char** argv) {
     init(argc, argv);
+    debug_input();
+
+    get1Itemset();
+    showResult();
     
+    if (ifPauseBeforeExit) {
+        system("pause");
+    }
     return 0;
 }
