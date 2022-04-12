@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-12 14:38:11
+ * @LastEditTime: 2022-04-12 14:45:08
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -22,25 +22,6 @@ using namespace std;
 string dataName;  // 输入文件名
 int minSupportNum = 0;  // 最小支持度
 vector<pair<vector<int>, int>> database;  // 数据库(内存版本) [<[itemNum, ...], appendTime>, ...]
-map<int, int> appendTime;  // 某个数据库中，每个item出现过的总次数
-// map<int, vector<vector<int>>> results;  // [<size, [[item, ...], ...]>]
-
-
-class Node {
-public:
-    int thisItem;
-    int count;
-    map<int, Node*> childs;
-    Node* next = nullptr;
-    Node* father = nullptr;
-    Node() {};
-    Node(int num, int thisAppendTime = 1) : thisItem(num), count(thisAppendTime) {};
-    ~Node() {delete this;};
-    Node* addChild(int num, int thisAppendTime = 1);
-};
-
-
-map<int, Node*> tableHead;  // 头表
 
 
 void init(int argc, char** argv);
@@ -48,38 +29,6 @@ void input();
 void debug_input();
 void analyMinSupportNum(string minSupportInput);
 void debug_analyMinSupportNum();
-void analyze(vector<int> prefix = {});
-void countAppendTime();
-Node* buildTree();
-bool cmp(int itemA, int itemB);
-bool singlePath(Node* root) {
-    while (root) {
-        if (root->childs.size() > 1)
-            return false;
-        root = root->childs.begin()->second;
-    }
-    return true;
-}
-
-
-Node* Node::addChild(int num, int thisAppendTime) {
-    if (childs.count(num)) {
-        Node* child = childs[num];
-        child->count += thisAppendTime;
-        return child;
-    }
-    else {
-        Node* child = new Node(num, thisAppendTime);
-        child->father = this;
-        if (tableHead.count(num)) {
-            tableHead[num]->next = child;
-        }
-        tableHead[num] = child;
-        childs[num] = child;
-        return child;
-    }
-}
-
 
 /**
  * 1. 分析命令行参数，未传递参数提示输入
@@ -223,102 +172,6 @@ void analyMinSupportNum(string minSupportInput) {
     }
 }
 
-/* 进行挖掘 */
-void analyze(vector<int> prefix) {
-    countAppendTime();
-    static bool firstTime = true;
-    if (firstTime) {  // 如果是第一次调用这个函数的话，先把一项集全部生成
-        for (auto [item, thisAppendTime] : appendTime) {
-            if (thisAppendTime >= minSupportNum) {
-                printf("{%d}\n", item);
-            }
-        }
-        firstTime = false;
-    }
-    Node* root = buildTree();
-    if (singlePath(root)) {
-        // 2^n + prefix
-        root = root->next;
-        printf("{");
-        bool firstTime = true;
-        while (root) {
-            if (firstTime)
-                firstTime = false;
-            else
-                printf(", ");
-            printf("%d", root->thisItem);
-        }
-        for (int& t : prefix) {
-            if (firstTime)
-                firstTime = false;
-            else
-                printf(", ");
-            printf("%d", t);
-        }
-        printf("}'s 2^n\n");
-        return;
-    }
-    map<int, Node*> tableHeadTemp = tableHead;
-    for (auto [num, head] : tableHeadTemp) {
-        vector<pair<vector<int>, int>> databaseBackup;
-        map<int, int> appendTimeBackup;
-        swap(database, databaseBackup);
-        swap(appendTime, appendTimeBackup);
-        
-        while (head) {
-            int thisAppendTime = head->father->count;
-            vector<int> thisLog;
-            Node* node = head;
-            while (node->father) {  // 根节点无father
-                thisLog.push_back(node->thisItem);
-                node = node->father;
-            }
-            databaseBackup.push_back({thisLog, thisAppendTime});
-            head = head->next;
-        }
-        vector<int> thisPrefix = prefix;
-        thisPrefix.push_back(num);
-        analyze(thisPrefix);
-
-        swap(database, databaseBackup);
-        swap(appendTime, appendTimeBackup);
-    }
-}
-
-/* (vector<vector<int>>) database -> (map<int, int>) appendTime */
-void countAppendTime() {
-    appendTime.clear();
-    for (auto [thisLog, thisAppendTime] : database)  {
-        for (int& t : thisLog) {
-            appendTime[t] += thisAppendTime;
-        }
-    }
-}
-
-/* 建树并返回root */
-Node* buildTree() {
-    Node* root = new Node();
-    for (auto [thisLog, thisAppendTime] : database) {
-        sort(thisLog.begin(), thisLog.end(), cmp);
-        Node* node = root;
-        for (int& thisItem : thisLog) {
-            if (appendTime[thisItem] < minSupportNum)
-                break;
-            node = node->addChild(thisItem, thisAppendTime);
-        }
-    }
-    return root;
-}
-
-/* 根据商品出现次数排序 */
-bool cmp(int itemA, int itemB) {
-    int appendTimeDiff = appendTime[itemA] - appendTime[itemB];
-    if (!appendTimeDiff) {  // 二者出现次数相同
-        return itemA < itemB;  // 小的itemId优先
-    }
-    return appendTimeDiff > 0;  // 出现次数大的在前
-}
-
 /* Debug: 输出database(vector<vector<int>>) */
 void debug_input() {
     puts("database:");
@@ -355,7 +208,5 @@ void debug_analyMinSupportNum() {
 
 int main(int argc, char** argv) {
     init(argc, argv);
-    analyze();
     return 0;
 }
-/* 准备只保留输入、初始化部分，其他重写了 */
