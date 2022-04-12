@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-10 22:19:07
+ * @LastEditTime: 2022-04-12 14:38:11
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -358,3 +358,4 @@ int main(int argc, char** argv) {
     analyze();
     return 0;
 }
+/* 准备只保留输入、初始化部分，其他重写了 */
