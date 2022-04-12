@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-12 16:54:35
+ * @LastEditTime: 2022-04-12 17:15:51
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -25,6 +25,7 @@ using ItemWithTime = pair<Items, int>;
 using Database = vector<ItemWithTime>;
 using AppendTime = map<Item, int>;
 using FrequentItemsets = vector<ItemWithTime>;
+#define HeadTable map<Item, pair<Node*, Node*>>  // [<Item, <FirstNode, LastNode>>]
 
 
 string dataName;  // 输入文件名
@@ -33,13 +34,21 @@ Database database;  // 数据库(内存版本) [<[itemNum, ...], appendTime>, ..
 FrequentItemsets frequentItemsets;  // 频繁项集 [<[item, ...], appendTime>, ...]
 bool ifPauseBeforeExit = false;  // 程序执行完是否退出
 
+
 struct Node {
     Item item;
     int appendTime;
     map<Item, Node*> childs;
-    Node* father;
+    Node* father = nullptr;
+    Node* next = nullptr;
     Node(Item item, int appendTime = 1) : item(item), appendTime(appendTime) {};
-    Node* addChild(Item item, int appendTime = 1);
+    Node* addChild(Item item, HeadTable& headTable, int appendTime = 1);
+    ~Node() {delete this;};
+};
+
+struct FP_Tree {
+    Node* root;
+    HeadTable headTable;
 };
 
 
@@ -52,10 +61,19 @@ void get1Itemset();
 void showResult();
 
 
-Node* Node::addChild(Item item, int appendTime) {
+Node* Node::addChild(Item item, HeadTable& headTable, int appendTime) {
     Node* newNode;
     if (!childs.count(item)) {
         newNode = new Node(item, appendTime);
+        next = newNode;
+        if (!headTable.count(item)) {  // 还没有过
+            headTable[item] = {newNode, newNode};
+        }
+        else {
+            pair<Node*, Node*>* itemInHeadtable = &headTable[item];
+            itemInHeadtable->second->next = newNode;
+            itemInHeadtable->second = newNode;
+        }
     }
     else {
         newNode = childs[item];
@@ -277,10 +295,7 @@ void debug_analyMinSupportNum() {
 
 int main(int argc, char** argv) {
     init(argc, argv);
-    debug_input();
-
     get1Itemset();
-    showResult();
     
     if (ifPauseBeforeExit) {
         system("pause");
