@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-12 17:15:51
+ * @LastEditTime: 2022-04-13 16:28:04
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -30,7 +30,7 @@ using FrequentItemsets = vector<ItemWithTime>;
 
 string dataName;  // 输入文件名
 int minSupportNum = 0;  // 最小支持度
-Database database;  // 数据库(内存版本) [<[itemNum, ...], appendTime>, ...]
+// Database database;  // 数据库(内存版本) [<[itemNum, ...], appendTime>, ...]
 FrequentItemsets frequentItemsets;  // 频繁项集 [<[item, ...], appendTime>, ...]
 bool ifPauseBeforeExit = false;  // 程序执行完是否退出
 
@@ -52,13 +52,14 @@ struct FP_Tree {
 };
 
 
-void init(int argc, char** argv);
-void input();
+Database &init(int argc, char** argv);
+Database &input();
 void debug_input();
-void analyMinSupportNum(string minSupportInput);
+void analyMinSupportNum(string minSupportInput, Database& database);
 void debug_analyMinSupportNum();
-void get1Itemset();
+void get1Itemset(Database& database);
 void showResult();
+void buildTree();
 
 
 Node* Node::addChild(Item item, HeadTable& headTable, int appendTime) {
@@ -86,8 +87,9 @@ Node* Node::addChild(Item item, HeadTable& headTable, int appendTime) {
  * 1. 分析命令行参数，未传递参数提示输入
  * 2. 初始化读入数据
  * 3. 确定最小支持度
+ * 4. 返回database
  */
-void init(int argc, char** argv) {
+Database &init(int argc, char** argv) {
     string minSupportInput;
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-i")) {
@@ -117,12 +119,14 @@ void init(int argc, char** argv) {
         cerr << "Please input the min support: ";
         cin >> minSupportInput;
     }
-    input();
-    analyMinSupportNum(minSupportInput);
+    Database database = input();
+    analyMinSupportNum(minSupportInput, database);
+    return database;
 }
 
 /* 将dataName中的数据读入到database中 */
-void input() {  // 读入数据
+Database &input() {  // 读入数据
+    Database database;
     ifstream istr(dataName.c_str(), ios::in);
     if (istr.fail()) {
         SlowExit("[2]: Open input file failed.", 2);
@@ -152,10 +156,11 @@ void input() {  // 读入数据
         database.push_back({thisLog, 1});
     }
     istr.close();
+    return database;
 }
 
 /* 将输入的最小支持度(string)转为最小支持数(int) */
-void analyMinSupportNum(string minSupportInput) {
+void analyMinSupportNum(string minSupportInput, Database& database) {
     /* “%”是否在minSupportInput中 */
     auto isPercentInStr = [&minSupportInput]() {
         for (const char& c : minSupportInput) {
@@ -228,7 +233,7 @@ void analyMinSupportNum(string minSupportInput) {
 }
 
 /* 根据初始数据库获得频繁一项集 */
-void get1Itemset() {
+void get1Itemset(Database& database) {
     AppendTime appendTime;
     for (ItemWithTime& transaction : database) {
         for(Item& item : transaction.first) {
@@ -260,7 +265,7 @@ void showResult() {
 }
 
 /* Debug: 输出database(vector<vector<int>>) */
-void debug_input() {
+void debug_input(Database& database) {
     puts("database:");
     puts("------------------");
     for (auto [thisLog, thisAppendTime] : database) {
@@ -283,9 +288,9 @@ void debug_input() {
 void debug_analyMinSupportNum() {
     cerr << "Debug: Please continue input minsupport and I will show you the result" << endl;
     string s;
-    database = {{{1, 2}, 1}, {{1}, 1}, {{2}, 1}, {{1}, 1}};
+    Database database = {{{1, 2}, 1}, {{1}, 1}, {{2}, 1}, {{1}, 1}};
     while (cin >> s) {
-        analyMinSupportNum(s);
+        analyMinSupportNum(s, database);
         printf("minSupportNum = %d, minSupport = %lf%%\n", minSupportNum, double(minSupportNum) * 100 / ((int)database.size()));
         printf("minSupportNum - 1 = %d, minSupport_1 = %lf%%\n", minSupportNum - 1, double(minSupportNum - 1) * 100 / ((int)database.size()));
         minSupportNum = 0;
@@ -294,8 +299,9 @@ void debug_analyMinSupportNum() {
 }
 
 int main(int argc, char** argv) {
-    init(argc, argv);
-    get1Itemset();
+    Database database = init(argc, argv);
+    get1Itemset(database);
+    showResult();
     
     if (ifPauseBeforeExit) {
         system("pause");
