@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-13 16:28:04
+ * @LastEditTime: 2022-04-13 16:35:49
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -52,8 +52,8 @@ struct FP_Tree {
 };
 
 
-Database &init(int argc, char** argv);
-Database &input();
+void init(int argc, char** argv, Database& database);
+void input(Database& database);
 void debug_input();
 void analyMinSupportNum(string minSupportInput, Database& database);
 void debug_analyMinSupportNum();
@@ -87,9 +87,9 @@ Node* Node::addChild(Item item, HeadTable& headTable, int appendTime) {
  * 1. 分析命令行参数，未传递参数提示输入
  * 2. 初始化读入数据
  * 3. 确定最小支持度
- * 4. 返回database
+ * 4. 数据存入database
  */
-Database &init(int argc, char** argv) {
+void init(int argc, char** argv, Database& database) {
     string minSupportInput;
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-i")) {
@@ -119,14 +119,12 @@ Database &init(int argc, char** argv) {
         cerr << "Please input the min support: ";
         cin >> minSupportInput;
     }
-    Database database = input();
+    input(database);
     analyMinSupportNum(minSupportInput, database);
-    return database;
 }
 
 /* 将dataName中的数据读入到database中 */
-Database &input() {  // 读入数据
-    Database database;
+void input(Database& database) {  // 读入数据
     ifstream istr(dataName.c_str(), ios::in);
     if (istr.fail()) {
         SlowExit("[2]: Open input file failed.", 2);
@@ -156,7 +154,6 @@ Database &input() {  // 读入数据
         database.push_back({thisLog, 1});
     }
     istr.close();
-    return database;
 }
 
 /* 将输入的最小支持度(string)转为最小支持数(int) */
@@ -299,7 +296,8 @@ void debug_analyMinSupportNum() {
 }
 
 int main(int argc, char** argv) {
-    Database database = init(argc, argv);
+    Database database;
+    init(argc, argv, database);
     get1Itemset(database);
     showResult();
     
