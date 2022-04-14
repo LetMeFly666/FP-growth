@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-13 16:35:49
+ * @LastEditTime: 2022-04-14 14:31:01
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -19,13 +19,16 @@ using namespace std;
 #define EXIT1IFNOANOTHERPARAMETR if (i + 1 >= argc) SlowExit("[0]: Parameter not enough", 1)  // 如果参数个数不足就exit(1)
 
 
+class Node;
+class FP_Tree;
+
 using Item = int;
 using Items = vector<Item>;
 using ItemWithTime = pair<Items, int>;
 using Database = vector<ItemWithTime>;
 using AppendTime = map<Item, int>;
 using FrequentItemsets = vector<ItemWithTime>;
-#define HeadTable map<Item, pair<Node*, Node*>>  // [<Item, <FirstNode, LastNode>>]
+using HeadTable = map<Item, pair<Node*, Node*>>;  // [<Item, <FirstNode, LastNode>>]
 
 
 string dataName;  // 输入文件名
@@ -47,7 +50,7 @@ struct Node {
 };
 
 struct FP_Tree {
-    Node* root;
+    Node* root = new Node(0);
     HeadTable headTable;
 };
 
@@ -59,14 +62,14 @@ void analyMinSupportNum(string minSupportInput, Database& database);
 void debug_analyMinSupportNum();
 void get1Itemset(Database& database);
 void showResult();
-void buildTree();
+void buildTree(Database& database, FP_Tree& fpTree);
+void debug_buildTree_headTable(Database& database);
 
 
 Node* Node::addChild(Item item, HeadTable& headTable, int appendTime) {
     Node* newNode;
     if (!childs.count(item)) {
         newNode = new Node(item, appendTime);
-        next = newNode;
         if (!headTable.count(item)) {  // 还没有过
             headTable[item] = {newNode, newNode};
         }
@@ -261,6 +264,34 @@ void showResult() {
     }
 }
 
+/* 通过database建树到fpTree中 */
+void buildTree(Database& database, FP_Tree& fpTree) {
+    // 统计出现次数
+    AppendTime appendTime;
+    for (ItemWithTime& transaction : database) {
+        for (Item& item : transaction.first) {
+            appendTime[item] += transaction.second;
+        }
+    }
+    // 排序函数
+    auto cmp = [&appendTime](Item& item1, Item& item2) {
+        int diff = appendTime[item1] - appendTime[item2];
+        if (diff)  // 出现次数不同，出现次数大的优先
+            return diff > 0;
+        return item1 < item2;  // 出现次数相同，编号小的优先
+    };
+    for (ItemWithTime& transaction : database) {
+        sort(transaction.first.begin(), transaction.first.end(), cmp);
+        Node* root = fpTree.root;
+        for (Item& item : transaction.first) {
+            if (appendTime[item] < minSupportNum) {
+                break;
+            }
+            root = root->addChild(item, fpTree.headTable, transaction.second);
+        }
+    }
+}
+
 /* Debug: 输出database(vector<vector<int>>) */
 void debug_input(Database& database) {
     puts("database:");
@@ -295,10 +326,34 @@ void debug_analyMinSupportNum() {
     exit(0);
 }
 
+/* debug buildTree 的 headTable */
+void debug_buildTree_headTable(Database& database) {
+    FP_Tree fpTree;
+    buildTree(database, fpTree);
+    HeadTable headTable = fpTree.headTable;
+    for (auto[item, nodes] : headTable) {
+        Node* node = nodes.first;
+        cout << "item[" << item << "]:";
+        bool first = true;
+        while (node) {
+            if (first)
+                first = false;
+            else
+                cout << " -> ";
+            cout << "(" << node << ", " << node->appendTime << ")";
+            node = node->next;
+        }
+        puts("");
+    }
+}
+
 int main(int argc, char** argv) {
     Database database;
     init(argc, argv, database);
     get1Itemset(database);
+
+    debug_buildTree_headTable(database);
+
     showResult();
     
     if (ifPauseBeforeExit) {
