@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-14 16:09:54
+ * @LastEditTime: 2022-04-14 16:17:07
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -261,8 +261,7 @@ void showResult() {
                 firstPrint = false;
             else
                 printf(", ");
-            // printf("%d", item);
-            printf("%c", item + 'a');  // TODO: 改回来
+            printf("%d", item);
         }
         printf("} --> %d\n", transaction.second);
     }
