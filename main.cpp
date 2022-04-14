@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-14 14:31:01
+ * @LastEditTime: 2022-04-14 14:45:03
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -70,6 +70,7 @@ Node* Node::addChild(Item item, HeadTable& headTable, int appendTime) {
     Node* newNode;
     if (!childs.count(item)) {
         newNode = new Node(item, appendTime);
+        childs[item] = newNode;
         if (!headTable.count(item)) {  // 还没有过
             headTable[item] = {newNode, newNode};
         }
