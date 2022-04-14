@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-14 20:32:39
+ * @LastEditTime: 2022-04-14 20:48:15
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -287,7 +287,7 @@ void buildTree(Database& database, FP_Tree& fpTree) {
         int diff = appendTime[item1] - appendTime[item2];
         if (diff)  // 出现次数不同，出现次数大的优先
             return diff > 0;
-        return item1 < item2;  // 出现次数相同，编号小的优先
+        return item1 > item2;  // 出现次数相同，编号大的优先（其实这个顺序无所谓，这样是为了和PPT保持一致）
     };
     for (ItemWithTime& transaction : database) {
         sort(transaction.first.begin(), transaction.first.end(), cmp);
@@ -442,7 +442,7 @@ void debug_vector(vector<T> v) {
 /* 打印FP-Tree */
 void debug_buildTree_Tree(FP_Tree& fpTree) {
     string head = "<html><head></head><body><div class=\"mermaid\">\ngraph TD\nRoot((Root))\n";
-    string tail = "\n</div></div><script src=\"./mermaid.min.js\"></script><script>mermaid.initialize({theme: 'forest',logLevel: 3,securityLevel: 'loose,'flowchart: { curve: 'basis' },});</script></body></html>";
+    string tail = "\n</div></div><script src=\"./mermaid.min.js\"></script><script>mermaid.initialize({theme: 'forest',logLevel: 3,securityLevel: 'loose',flowchart: { curve: 'basis' },});</script></body></html>";
     string middle;
     queue<Node*> q;
     map<Node*, string> ma;
