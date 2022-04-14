@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-14 18:30:45
+ * @LastEditTime: 2022-04-14 20:26:34
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -11,6 +11,7 @@
 #include <istream>  // getline
 #include <cstring>
 #include <vector>
+#include <queue>
 #include <map>
 #include <ctime>
 using namespace std;
@@ -66,7 +67,9 @@ void showResult();
 void buildTree(Database& database, FP_Tree& fpTree);
 void debug_buildTree_headTable(Database& database);
 void digData(FP_Tree& fpTree, vector<Item> prefix);
-
+template <class T>
+void debug_vector(vector<T> v);
+void debug_buildTree_Tree(FP_Tree& fpTree);
 
 Node* Node::addChild(Item item, HeadTable& headTable, int appendTime) {
     Node* newNode;
@@ -270,6 +273,8 @@ void showResult() {
 
 /* 通过database建树到fpTree中 */
 void buildTree(Database& database, FP_Tree& fpTree) {
+    static int buildTime = 0;
+    printf("the %d-th time building a tree\n", ++buildTime);
     // 统计出现次数
     AppendTime appendTime;
     for (ItemWithTime& transaction : database) {
@@ -310,6 +315,8 @@ void digData(FP_Tree& fpTree, vector<Item> prefix) {
         }
         return true;
     };
+    if (!fpTree.root->childs.size())
+        return;
     if (ifIsSinglePath()) {
         vector<Item> itemsInTree;
         Node* root = fpTree.root;
@@ -324,6 +331,12 @@ void digData(FP_Tree& fpTree, vector<Item> prefix) {
             else  // 无子
                 break;
         }
+
+        printf("When the prefix is: ");  //******
+        debug_vector(prefix);  //********
+        printf("The single path items: ");//**********
+        debug_vector(itemsInTree);  //*******
+
         for (int i = 1; i < (1 << (itemsInTree.size())); i++) {
             vector<Item> thisItems = prefix;
             for (int j = 0; j < itemsInTree.size(); j++) {
@@ -331,6 +344,9 @@ void digData(FP_Tree& fpTree, vector<Item> prefix) {
                     thisItems.push_back(itemsInTree[j]);
                 }
             }
+            printf("add 2^n-1 (%d times): ", minAppendTime);  //*******
+            debug_vector(thisItems);  //******
+
             frequentItemsets.push_back({thisItems, minAppendTime});
         }
     }
@@ -408,6 +424,49 @@ void debug_buildTree_headTable(Database& database) {
     }
 }
 
+/* 打印一个vector */
+template <class T>
+void debug_vector(vector<T> v) {
+    printf("[");
+    bool first = true;
+    for (T& t : v) {
+        if (first)
+            first = false;
+        else
+            printf(", ");
+        cout << (char)(t + 'a');
+    }
+    printf("]\n");
+}
+
+/* 打印FP-Tree */
+void debug_buildTree_Tree(FP_Tree& fpTree) {
+    string head = "<html><head></head><body><div class=\"mermaid\">\ngraph LR\nRoot((Root))\n";
+    string tail = "\n</div></div><script src=\"./mermaid.min.js\"></script><script>mermaid.initialize({theme: 'forest',logLevel: 3,securityLevel: 'loose,'flowchart: { curve: 'basis' },});</script></body></html>";
+    string middle;
+    queue<Node*> q;
+    map<Node*, string> ma;
+    ma[fpTree.root] = "Root";
+    q.push(fpTree.root);
+    int id = 0;
+    while (q.size()) {
+        Node* node = q.front();
+        q.pop();
+        for (auto [Item, nextNode] : node->childs) {
+            if (!ma.count(nextNode)) {
+                string thisId = to_string(id++);
+                ma[nextNode] = thisId;
+                middle += thisId + "((";
+                middle += to_string(nextNode->item) + " : " + to_string(nextNode->appendTime);
+                middle += "))\n";
+            }
+        }
+    }
+    ofstream ostr("source/Tree.html", ios::out);
+    ostr << head + middle + tail;
+    ostr.close();
+}
+
 int main(int argc, char** argv) {
     Database database;
     init(argc, argv, database);
@@ -415,6 +474,7 @@ int main(int argc, char** argv) {
     get1Itemset(database);
     FP_Tree fpTree;
     buildTree(database, fpTree);
+    debug_buildTree_Tree(fpTree);
     digData(fpTree, {});
     
     clock_t end = clock();
