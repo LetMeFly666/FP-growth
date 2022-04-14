@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-14 14:45:03
+ * @LastEditTime: 2022-04-14 15:50:23
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -64,6 +64,7 @@ void get1Itemset(Database& database);
 void showResult();
 void buildTree(Database& database, FP_Tree& fpTree);
 void debug_buildTree_headTable(Database& database);
+void digData(FP_Tree& fpTree, vector<Item> prefix);
 
 
 Node* Node::addChild(Item item, HeadTable& headTable, int appendTime) {
@@ -71,6 +72,7 @@ Node* Node::addChild(Item item, HeadTable& headTable, int appendTime) {
     if (!childs.count(item)) {
         newNode = new Node(item, appendTime);
         childs[item] = newNode;
+        newNode->father = this;
         if (!headTable.count(item)) {  // 还没有过
             headTable[item] = {newNode, newNode};
         }
@@ -293,6 +295,59 @@ void buildTree(Database& database, FP_Tree& fpTree) {
     }
 }
 
+/* 通过[树&前缀]进行数据挖掘 */
+void digData(FP_Tree& fpTree, vector<Item> prefix) {
+    auto ifIsSinglePath = [&fpTree]() {
+        Node* root = fpTree.root;
+        while (root) {
+            if (root->childs.size() > 1)
+                return false;
+            if (root->childs.size() == 1)
+                root = root->childs.begin()->second;
+        }
+        return true;
+    };
+    if (ifIsSinglePath()) {
+        vector<Item> itemsInTree;
+        Node* root = fpTree.root;
+        int minAppendTime = INT_MAX;
+        while (root) {
+            if (root != fpTree.root) {
+                itemsInTree.push_back(root->item);
+                minAppendTime = min(minAppendTime, root->appendTime);
+            }
+            if (root->childs.size())
+                root = root->childs.begin()->second;
+        }
+        for (int i = 1; i < (1 << (itemsInTree.size())); i++) {
+            vector<Item> thisItems = prefix;
+            for (int j = 0; j < itemsInTree.size(); j++) {
+                if (i & (1 << j)) {
+                    thisItems.push_back(itemsInTree[j]);
+                }
+            }
+            frequentItemsets.push_back({thisItems, minAppendTime});
+        }
+    }
+    else {
+        for (auto& [item, nodes] : fpTree.headTable) {  // 头表中的每个元素
+            Database database;
+            vector<Item> thisPrefix = prefix;
+            thisPrefix.push_back(item);
+            for (Node* node = nodes.first; node; node = node->next) {  // 这个元素链
+                vector<Item> thisVector;
+                for (Node* p = node->father; p != fpTree.root; p = p->father) {  // 往上遍历
+                    thisVector.push_back(p->item);
+                }
+                database.push_back({thisVector, node->appendTime});
+            }
+            FP_Tree newFPTree;
+            buildTree(database, newFPTree);
+            digData(newFPTree, thisPrefix);
+        }
+    }
+}
+
 /* Debug: 输出database(vector<vector<int>>) */
 void debug_input(Database& database) {
     puts("database:");
@@ -352,9 +407,9 @@ int main(int argc, char** argv) {
     Database database;
     init(argc, argv, database);
     get1Itemset(database);
-
-    debug_buildTree_headTable(database);
-
+    FP_Tree fpTree;
+    buildTree(database, fpTree);
+    digData(fpTree, {});
     showResult();
     
     if (ifPauseBeforeExit) {
