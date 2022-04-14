@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-14 15:50:23
+ * @LastEditTime: 2022-04-14 15:59:38
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -300,10 +300,12 @@ void digData(FP_Tree& fpTree, vector<Item> prefix) {
     auto ifIsSinglePath = [&fpTree]() {
         Node* root = fpTree.root;
         while (root) {
-            if (root->childs.size() > 1)
+            if (root->childs.size() > 1)  // 非单子
                 return false;
-            if (root->childs.size() == 1)
+            if (root->childs.size() == 1)  // 单子
                 root = root->childs.begin()->second;
+            else  // 无子
+                break;
         }
         return true;
     };
@@ -316,8 +318,10 @@ void digData(FP_Tree& fpTree, vector<Item> prefix) {
                 itemsInTree.push_back(root->item);
                 minAppendTime = min(minAppendTime, root->appendTime);
             }
-            if (root->childs.size())
+            if (root->childs.size())  // 有子(必为1)
                 root = root->childs.begin()->second;
+            else  // 无子
+                break;
         }
         for (int i = 1; i < (1 << (itemsInTree.size())); i++) {
             vector<Item> thisItems = prefix;
