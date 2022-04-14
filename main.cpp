@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-14 20:26:34
+ * @LastEditTime: 2022-04-14 20:32:39
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -441,7 +441,7 @@ void debug_vector(vector<T> v) {
 
 /* 打印FP-Tree */
 void debug_buildTree_Tree(FP_Tree& fpTree) {
-    string head = "<html><head></head><body><div class=\"mermaid\">\ngraph LR\nRoot((Root))\n";
+    string head = "<html><head></head><body><div class=\"mermaid\">\ngraph TD\nRoot((Root))\n";
     string tail = "\n</div></div><script src=\"./mermaid.min.js\"></script><script>mermaid.initialize({theme: 'forest',logLevel: 3,securityLevel: 'loose,'flowchart: { curve: 'basis' },});</script></body></html>";
     string middle;
     queue<Node*> q;
@@ -453,13 +453,14 @@ void debug_buildTree_Tree(FP_Tree& fpTree) {
         Node* node = q.front();
         q.pop();
         for (auto [Item, nextNode] : node->childs) {
-            if (!ma.count(nextNode)) {
-                string thisId = to_string(id++);
-                ma[nextNode] = thisId;
-                middle += thisId + "((";
-                middle += to_string(nextNode->item) + " : " + to_string(nextNode->appendTime);
-                middle += "))\n";
-            }
+            q.push(nextNode);
+            string thisId = to_string(id++);
+            ma[nextNode] = thisId;
+            middle += thisId + "((";
+            middle += (char)(nextNode->item + 'a');
+            middle += " : " + to_string(nextNode->appendTime);
+            middle += "))\n";
+            middle += ma[node] + " --> " + ma[nextNode] + "\n";
         }
     }
     ofstream ostr("source/Tree.html", ios::out);
