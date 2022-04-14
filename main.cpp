@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-14 16:17:07
+ * @LastEditTime: 2022-04-14 18:30:45
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -12,6 +12,7 @@
 #include <cstring>
 #include <vector>
 #include <map>
+#include <ctime>
 using namespace std;
 #define dbg(x) cout << #x << " = " << x << endl
 
@@ -410,12 +411,16 @@ void debug_buildTree_headTable(Database& database) {
 int main(int argc, char** argv) {
     Database database;
     init(argc, argv, database);
+    clock_t start = clock();
     get1Itemset(database);
     FP_Tree fpTree;
     buildTree(database, fpTree);
     digData(fpTree, {});
-    showResult();
     
+    clock_t end = clock();
+    cerr << "Time consumed: " << (double)(end - start) / CLK_TCK << "s" << endl;
+    showResult();
+
     if (ifPauseBeforeExit) {
         system("pause");
     }
