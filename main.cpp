@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-15 11:13:19
+ * @LastEditTime: 2022-04-15 14:23:31
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -39,6 +39,9 @@ int minSupportNum = 0;  // 最小支持度
 // Database database;  // 数据库(内存版本) [<[itemNum, ...], appendTime>, ...]
 FrequentItemsets frequentItemsets;  // 频繁项集 [<[item, ...], appendTime>, ...]
 bool ifPauseBeforeExit = false;  // 程序执行完是否退出
+bool ifDebug = false;  // 是否debug
+string visualizeMiddle;  // 可视化树的中间代码
+int visualizeTime = 0;  // 可视化了几个树（为了对每个树使用不同的id）
 
 
 struct Node {
@@ -70,7 +73,10 @@ void debug_buildTree_headTable(Database& database);
 void digData(FP_Tree& fpTree, vector<Item> prefix);
 template <class T>
 void debug_vector(vector<T> v);
-void debug_buildTree_Tree(FP_Tree& fpTree);
+void debug_buildTree_Tree_OneTree(FP_Tree& fpTree);
+string debug_buildTree_generateTreeCode(FP_Tree& fpTree, string nameId);
+void debug_buildTree_toFile(string middle);
+
 
 Node* Node::addChild(Item item, HeadTable& headTable, int appendTime) {
     Node* newNode;
@@ -120,6 +126,9 @@ void init(int argc, char** argv, Database& database) {
         }
         else if (!strcmp(argv[i], "-p")) {
             ifPauseBeforeExit = true;
+        }
+        else if (!strcmp(argv[i], "-d")) {
+            ifDebug = true;
         }
     }
     if (dataName.empty()) {  // 输入文件
@@ -303,76 +312,11 @@ void buildTree(Database& database, FP_Tree& fpTree) {
 }
 
 /* 通过[树&前缀]进行数据挖掘 */
-void digData_0(FP_Tree& fpTree, vector<Item> prefix) {
-    debug_buildTree_Tree(fpTree);  //**********
-    auto ifIsSinglePath = [&fpTree]() {
-        Node* root = fpTree.root;
-        while (root) {
-            if (root->childs.size() > 1)  // 非单子
-                return false;
-            if (root->childs.size() == 1)  // 单子
-                root = root->childs.begin()->second;
-            else  // 无子
-                break;
-        }
-        return true;
-    };
-    if (!fpTree.root->childs.size())
-        return;
-    if (ifIsSinglePath()) {
-        vector<Item> itemsInTree;
-        Node* root = fpTree.root;
-        int minAppendTime = INT_MAX;
-        while (root) {
-            if (root != fpTree.root) {
-                itemsInTree.push_back(root->item);
-                minAppendTime = min(minAppendTime, root->appendTime);
-            }
-            if (root->childs.size())  // 有子(必为1)
-                root = root->childs.begin()->second;
-            else  // 无子
-                break;
-        }
-
-        printf("When the prefix is: ");  //******
-        debug_vector(prefix);  //********
-        printf("The single path items: ");//**********
-        debug_vector(itemsInTree);  //*******
-
-        for (int i = 1; i < (1 << (itemsInTree.size())); i++) {
-            vector<Item> thisItems = prefix;
-            for (int j = 0; j < itemsInTree.size(); j++) {
-                if (i & (1 << j)) {
-                    thisItems.push_back(itemsInTree[j]);
-                }
-            }
-            printf("add 2^n-1 (%d times): ", minAppendTime);  //*******
-            debug_vector(thisItems);  //******
-
-            frequentItemsets.push_back({thisItems, minAppendTime});
-        }
-    }
-    else {
-        for (auto& [item, nodes] : fpTree.headTable) {  // 头表中的每个元素
-            Database database;
-            vector<Item> thisPrefix = prefix;
-            thisPrefix.push_back(item);
-            for (Node* node = nodes.first; node; node = node->next) {  // 这个元素链
-                vector<Item> thisVector;
-                for (Node* p = node->father; p != fpTree.root; p = p->father) {  // 往上遍历
-                    thisVector.push_back(p->item);
-                }
-                database.push_back({thisVector, node->appendTime});
-            }
-            FP_Tree newFPTree;
-            buildTree(database, newFPTree);
-            digData(newFPTree, thisPrefix);
-        }
-    }
-}
-
-/* 通过[树&前缀]进行数据挖掘 */
 void digData(FP_Tree& fpTree, vector<Item> prefix) {
+    int thisVisualizeTime = visualizeTime;
+    if (ifDebug) {
+        visualizeMiddle += debug_buildTree_generateTreeCode(fpTree, to_string(visualizeTime++));
+    }
     if (fpTree.root->childs.empty())
         return;
     const auto ifSinglePath = [](FP_Tree& fpTree) {
@@ -426,6 +370,11 @@ void digData(FP_Tree& fpTree, vector<Item> prefix) {
             }
             FP_Tree newTree;
             buildTree(thisDatabase, newTree);
+            if (ifDebug) {
+                visualizeMiddle += to_string(thisVisualizeTime) + " -- ";
+                visualizeMiddle += (char)(item + 'a');
+                visualizeMiddle += " --> " + to_string(visualizeTime) + "\n";
+            }
             digData(newTree, thisPrefix);
         }
     }
@@ -502,14 +451,28 @@ void debug_vector(vector<T> v) {
 }
 
 /* 打印FP-Tree */
-void debug_buildTree_Tree(FP_Tree& fpTree) {
-    string head = "<html><head></head><body><div class=\"mermaid\">\ngraph TD\nRoot((Root))\n";
-    string tail = "</div></div><script src=\"./mermaid.min.js\"></script><script>mermaid.initialize({theme: 'forest',logLevel: 3,securityLevel: 'loose',flowchart: { curve: 'basis' },});</script></body></html>";
-    string middle;
+void debug_buildTree_toFile(string middle) {
+    string head = "<html><head></head><body><div class=\"mermaid\">\nflowchart LR\n";
+    string tail = "</div><script src=\"./mermaid.min.js\"></script><script>mermaid.initialize({theme: 'forest',logLevel: 3,securityLevel: 'loose',flowchart: { curve: 'basis' },});</script></body></html>";
+    ofstream ostr("source/Tree.html", ios::out);
+    ostr << head + middle + tail;
+    ostr.close();
+}
+
+/* 只debug建立的初始的树 */
+void debug_buildTree_Tree_OneTree(FP_Tree& fpTree) {
+    string middle = debug_buildTree_generateTreeCode(fpTree, "First");
+    debug_buildTree_toFile(middle);
+}
+
+/* 生成树的可视化代码 */
+string debug_buildTree_generateTreeCode(FP_Tree& fpTree, string nameId) {
+    string middle = "subgraph " + nameId + "\n";
+    middle += nameId + "_Root((Root))\n";
     // headTable
-    middle += "subgraph Head Table\n";
+    middle += "subgraph " + nameId + " Head Table\n";
     for (auto [item, nodes] : fpTree.headTable) {
-        middle += "HeadNode" + to_string(item) + "((" + (char)(item + 'a') + " : ";
+        middle += nameId + "_HeadNode" + to_string(item) + "((" + (char)(item + 'a') + " : ";
         int cnt = 0;
         for (Node* p = nodes.first; p; p = p->next) {
             cnt += p->appendTime;
@@ -521,7 +484,7 @@ void debug_buildTree_Tree(FP_Tree& fpTree) {
     // tree
     queue<Node*> q;
     map<Node*, string> ma;
-    ma[fpTree.root] = "Root";
+    ma[fpTree.root] = nameId + "_Root";
     q.push(fpTree.root);
     int id = 0;
     while (q.size()) {
@@ -530,8 +493,8 @@ void debug_buildTree_Tree(FP_Tree& fpTree) {
         for (auto [Item, nextNode] : node->childs) {
             q.push(nextNode);
             string thisId = to_string(id++);
-            ma[nextNode] = thisId;
-            middle += thisId + "((";
+            ma[nextNode] = nameId + "_" + thisId;
+            middle += ma[nextNode] + "((";
             middle += (char)(nextNode->item + 'a');
             middle += " : " + to_string(nextNode->appendTime);
             middle += "))\n";
@@ -540,15 +503,14 @@ void debug_buildTree_Tree(FP_Tree& fpTree) {
     }
     // headTable
     for (auto [item, nodes] : fpTree.headTable) {
-        middle += "HeadNode" + to_string(item) + " -..->" + ma[nodes.first] + "\n";
+        middle += nameId + "_HeadNode" + to_string(item) + " -..->" + ma[nodes.first] + "\n";
         Node* lastNode = nodes.first;
         for (Node* p = nodes.first->next; p; lastNode = p, p = p->next) {
             middle += ma[lastNode] + " -..-> " + ma[p] + "\n";
         }
     }
-    ofstream ostr("source/Tree.html", ios::out);
-    ostr << head + middle + tail;
-    ostr.close();
+    middle += "end\n";
+    return middle;
 }
 
 int main(int argc, char** argv) {
@@ -563,6 +525,11 @@ int main(int argc, char** argv) {
     clock_t end = clock();
     cerr << "Time consumed: " << (double)(end - start) / CLK_TCK << "s" << endl;
     showResult();
+
+    if (ifDebug) {
+        debug_buildTree_toFile(visualizeMiddle);
+        system("start source/Tree.html");
+    }
 
     if (ifPauseBeforeExit) {
         system("pause");

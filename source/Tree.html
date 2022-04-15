@@ -1,45 +1,111 @@
 <html><head></head><body><div class="mermaid">
-graph TD
-Root((Root))
-subgraph Head Table
-HeadNode0((a : 3))
-HeadNode1((b : 3))
-HeadNode2((c : 4))
-HeadNode5((f : 4))
-HeadNode12((m : 3))
-HeadNode15((p : 3))
+flowchart LR
+subgraph 0
+0_Root((Root))
+subgraph 0 Head Table
+0_HeadNode0((a : 3))
+0_HeadNode1((b : 3))
+0_HeadNode2((c : 4))
+0_HeadNode5((f : 4))
+0_HeadNode12((m : 3))
+0_HeadNode15((p : 3))
 end
-0((c : 4))
-Root --> 0
-1((f : 1))
-Root --> 1
-2((b : 1))
-0 --> 2
-3((f : 3))
-0 --> 3
-4((b : 1))
-1 --> 4
-5((p : 1))
-2 --> 5
-6((a : 3))
-3 --> 6
-7((b : 1))
-6 --> 7
-8((m : 2))
-6 --> 8
-9((m : 1))
-7 --> 9
-10((p : 2))
-8 --> 10
-HeadNode0 -..->6
-HeadNode1 -..->7
-7 -..-> 4
-4 -..-> 2
-HeadNode2 -..->0
-HeadNode5 -..->3
-3 -..-> 1
-HeadNode12 -..->8
-8 -..-> 9
-HeadNode15 -..->10
-10 -..-> 5
-</div></div><script src="./mermaid.min.js"></script><script>mermaid.initialize({theme: 'forest',logLevel: 3,securityLevel: 'loose',flowchart: { curve: 'basis' },});</script></body></html>
+0_0((c : 4))
+0_Root --> 0_0
+0_1((f : 1))
+0_Root --> 0_1
+0_2((b : 1))
+0_0 --> 0_2
+0_3((f : 3))
+0_0 --> 0_3
+0_4((b : 1))
+0_1 --> 0_4
+0_5((p : 1))
+0_2 --> 0_5
+0_6((a : 3))
+0_3 --> 0_6
+0_7((b : 1))
+0_6 --> 0_7
+0_8((m : 2))
+0_6 --> 0_8
+0_9((m : 1))
+0_7 --> 0_9
+0_10((p : 2))
+0_8 --> 0_10
+0_HeadNode0 -..->0_6
+0_HeadNode1 -..->0_7
+0_7 -..-> 0_4
+0_4 -..-> 0_2
+0_HeadNode2 -..->0_0
+0_HeadNode5 -..->0_3
+0_3 -..-> 0_1
+0_HeadNode12 -..->0_8
+0_8 -..-> 0_9
+0_HeadNode15 -..->0_10
+0_10 -..-> 0_5
+end
+0 -- a --> 1
+subgraph 1
+1_Root((Root))
+subgraph 1 Head Table
+1_HeadNode2((c : 3))
+1_HeadNode5((f : 3))
+end
+1_0((c : 3))
+1_Root --> 1_0
+1_1((f : 3))
+1_0 --> 1_1
+1_HeadNode2 -..->1_0
+1_HeadNode5 -..->1_1
+end
+0 -- b --> 2
+subgraph 2
+2_Root((Root))
+subgraph 2 Head Table
+end
+end
+0 -- c --> 3
+subgraph 3
+3_Root((Root))
+subgraph 3 Head Table
+end
+end
+0 -- f --> 4
+subgraph 4
+4_Root((Root))
+subgraph 4 Head Table
+4_HeadNode2((c : 3))
+end
+4_0((c : 3))
+4_Root --> 4_0
+4_HeadNode2 -..->4_0
+end
+0 -- m --> 5
+subgraph 5
+5_Root((Root))
+subgraph 5 Head Table
+5_HeadNode0((a : 3))
+5_HeadNode2((c : 3))
+5_HeadNode5((f : 3))
+end
+5_0((a : 3))
+5_Root --> 5_0
+5_1((c : 3))
+5_0 --> 5_1
+5_2((f : 3))
+5_1 --> 5_2
+5_HeadNode0 -..->5_0
+5_HeadNode2 -..->5_1
+5_HeadNode5 -..->5_2
+end
+0 -- p --> 6
+subgraph 6
+6_Root((Root))
+subgraph 6 Head Table
+6_HeadNode2((c : 3))
+end
+6_0((c : 3))
+6_Root --> 6_0
+6_HeadNode2 -..->6_0
+end
+</div><script src="./mermaid.min.js"></script><script>mermaid.initialize({theme: 'forest',logLevel: 3,securityLevel: 'loose',flowchart: { curve: 'basis' },});</script></body></html>

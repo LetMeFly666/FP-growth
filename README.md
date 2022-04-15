@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:40:57
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-12 16:14:20
+ * @LastEditTime: 2022-04-15 14:05:43
 -->
 # FP-growth
 
@@ -33,6 +33,7 @@ FP-growth[.exe] [-i DATANAME] [-s SUPPORT] [-o RESULT] [-h] [-p]
 | ```-o``` | ✖ | 重定向输出 | 如果参数中有```-o```，那么程序将会重定向输出到下一个参数所代表的文件中。如```FP-growth -o output.txt```。相当于```FP-growth > output.txt```。提示性信息如"请输入数据文件名"不会重定向到该指定文件中。 |
 | ```-h``` | ✖ | 显示帮助 | 如果参数中有```-h```，那么程序将会打开在线帮助文档[https://fp-growth.letmefly.xyz](https://fp-growth.letmefly.xyz)。 |
 | ```-p``` | ✖ | 执行完暂停 | 如果参数中有```-p```，那么程序执行完将不会退出控制台，而是等待一个任意的按键。 |
+| ```-d``` | ✖ | Debug | 如果参数中有```-d```，那么程序将会绘制递归计算流程图，（仅对数据量很小如source/min.dat等数据范围在[0,26]的小数据有效）有效 |
 
 #### 最小支持度 <a id="minSupport"></a>
 
