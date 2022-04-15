@@ -10,6 +10,7 @@
 #include <fstream>
 #include <istream>  // getline
 #include <cstring>
+#include <string>
 #include <vector>
 #include <queue>
 #include <map>
