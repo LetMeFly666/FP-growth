@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-15 20:07:04
+ * @LastEditTime: 2022-04-15 21:03:55
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -66,7 +66,7 @@ void input(Database& database);
 void debug_input();
 void analyMinSupportNum(string minSupportInput, Database& database);
 void debug_analyMinSupportNum();
-void get1Itemset(Database& database);
+// void get1Itemset(Database& database);
 void showResult();
 void buildTree(Database& database, FP_Tree& fpTree);
 void debug_buildTree_headTable(Database& database);
@@ -250,19 +250,19 @@ void analyMinSupportNum(string minSupportInput, Database& database) {
 }
 
 /* 根据初始数据库获得频繁一项集 */
-void get1Itemset(Database& database) {
-    AppendTime appendTime;
-    for (ItemWithTime& transaction : database) {
-        for(Item& item : transaction.first) {
-            appendTime[item] += transaction.second;
-        }
-    }
-    for (AppendTime::iterator it = appendTime.begin(); it != appendTime.end(); it++) {
-        if (it->second >= minSupportNum) {
-            frequentItemsets.push_back({{it->first}, it->second});
-        }
-    }
-}
+// void get1Itemset(Database& database) {
+//     AppendTime appendTime;
+//     for (ItemWithTime& transaction : database) {
+//         for(Item& item : transaction.first) {
+//             appendTime[item] += transaction.second;
+//         }
+//     }
+//     for (AppendTime::iterator it = appendTime.begin(); it != appendTime.end(); it++) {
+//         if (it->second >= minSupportNum) {
+//             frequentItemsets.push_back({{it->first}, it->second});
+//         }
+//     }
+// }
 
 /* 展示结果 */
 void showResult() {
@@ -284,7 +284,6 @@ void showResult() {
 /* 通过database建树到fpTree中 */
 void buildTree(Database& database, FP_Tree& fpTree) {
     static int buildTime = 0;
-    printf("the %d-th time building a tree\n", ++buildTime);
     // 统计出现次数
     AppendTime appendTime;
     for (ItemWithTime& transaction : database) {
@@ -391,13 +390,24 @@ void digData(FP_Tree& fpTree, vector<Item> prefix) {
                 }
                 thisDatabase.push_back({thisTransaction, p->appendTime});
             }
+            frequentItemsets.push_back({thisPrefix, nodes.first->appendTime});  // !!!注意，这个也要作为结果
             FP_Tree newTree;
             buildTree(thisDatabase, newTree);
             if (ifDebug) {
                 visualizeMiddle += to_string(thisVisualizeTime) + " -- ";
                 visualizeMiddle += (char)(item + 'a');
                 visualizeMiddle += " --> " + to_string(visualizeTime) + "\n";
-                visualizeMiddle += to_string(thisVisualizeTime) + "_NoGenerat[recurse]\n";
+                visualizeMiddle += to_string(thisVisualizeTime) + "_NoGenerat[\"{";
+                bool firstPrint = true;
+                for (Item item : prefix) {
+                    if (firstPrint)
+                        firstPrint = false;
+                    else
+                        visualizeMiddle += ", ";
+                    visualizeMiddle += (char)(item + 'a');
+                }
+                visualizeMiddle += "} x " + to_string(nodes.first->appendTime);
+                visualizeMiddle += "\"]\n";
             }
             digData(newTree, thisPrefix);
         }
@@ -560,7 +570,7 @@ int main(int argc, char** argv) {
     Database database;
     init(argc, argv, database);
     clock_t start = clock();
-    get1Itemset(database);
+    // get1Itemset(database);
     FP_Tree fpTree;
     buildTree(database, fpTree);
     digData(fpTree, {});

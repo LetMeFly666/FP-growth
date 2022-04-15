@@ -28,7 +28,7 @@ end
 0_HeadNode3 -..->0_2
 end
 0 -- a --> 1
-0_NoGenerat[recurse]
+0_NoGenerat["{} x 14"]
 subgraph 1
 1_Root((Root))
 subgraph 1_prefix[prefix]
@@ -42,7 +42,7 @@ end
 end
 1_NoGenerat[Empty]
 0 -- b --> 2
-0_NoGenerat[recurse]
+0_NoGenerat["{} x 7"]
 subgraph 2
 2_Root((Root))
 subgraph 2_prefix[prefix]
@@ -60,7 +60,7 @@ end
 end
 2_NoGenerat["{b, a} x 7"]
 0 -- c --> 3
-0_NoGenerat[recurse]
+0_NoGenerat["{} x 3"]
 subgraph 3
 3_Root((Root))
 subgraph 3_prefix[prefix]
@@ -85,7 +85,7 @@ end
 3_HeadNode3 -..->3_2
 end
 3 -- a --> 4
-3_NoGenerat[recurse]
+3_NoGenerat["{c} x 6"]
 subgraph 4
 4_Root((Root))
 subgraph 4_prefix[prefix]
@@ -99,7 +99,7 @@ end
 end
 4_NoGenerat[Empty]
 3 -- b --> 5
-3_NoGenerat[recurse]
+3_NoGenerat["{c} x 3"]
 subgraph 5
 5_Root((Root))
 subgraph 5_prefix[prefix]
@@ -117,7 +117,7 @@ end
 end
 5_NoGenerat["{c, b, a} x 3"]
 3 -- d --> 6
-3_NoGenerat[recurse]
+3_NoGenerat["{c} x 3"]
 subgraph 6
 6_Root((Root))
 subgraph 6_prefix[prefix]
@@ -135,7 +135,7 @@ end
 end
 6_NoGenerat["{c, d, a} x 3"]
 0 -- d --> 7
-0_NoGenerat[recurse]
+0_NoGenerat["{} x 7"]
 subgraph 7
 7_Root((Root))
 subgraph 7_prefix[prefix]

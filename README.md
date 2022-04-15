@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:40:57
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-15 16:11:19
+ * @LastEditTime: 2022-04-15 21:11:10
 -->
 # FP-growth
 
@@ -60,3 +60,7 @@ FP-growth[.exe] [-i DATANAME] [-s SUPPORT] [-o RESULT] [-h] [-p]
 ### Example
 
 + ```fp-growth -i source/min2.dat -s 3 -d```
+
+   运行结果(详见[source/result/visualize_min2_s3.svg](source/result/visualize_min2_s3.svg))：
+
+   <img src="source/result/visualize_min2_s3.svg">
