@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:40:57
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-15 21:11:10
+ * @LastEditTime: 2022-04-15 22:00:41
 -->
 # FP-growth
 
@@ -64,3 +64,31 @@ FP-growth[.exe] [-i DATANAME] [-s SUPPORT] [-o RESULT] [-h] [-p]
    运行结果(详见[source/result/visualize_min2_s3.svg](source/result/visualize_min2_s3.svg))：
 
    <img src="source/result/visualize_min2_s3.svg">
+
+## Release
+
+<details>
+<summary>MSVC所需DLL</summary>
+<li><a href="https://github.com/LetMeFly666/FP-growth/releases/download/DLLs%2CstaticFilesAndSoOn/Dlls.Because.of.Visual.Sutdio.rar">Dlls.Because.of.Visual.Sutdio.rar</a></li>
+<li><a href="https://github.com/LetMeFly666/FP-growth/releases/download/DLLs%2CstaticFilesAndSoOn/msvcp140.dll">msvcp140.dll</a></li>
+<li><a href="https://github.com/LetMeFly666/FP-growth/releases/download/DLLs%2CstaticFilesAndSoOn/msvcp140d.dll">msvcp140d.dll</a></li>
+<li><a href="https://github.com/LetMeFly666/FP-growth/releases/download/DLLs%2CstaticFilesAndSoOn/ucrtbased.dll">ucrtbased.dll</a></li>
+<li><a href="https://github.com/LetMeFly666/FP-growth/releases/download/DLLs%2CstaticFilesAndSoOn/vcruntime140.dll">vcruntime140.dll</a></li>
+<li><a href="https://github.com/LetMeFly666/FP-growth/releases/download/DLLs%2CstaticFilesAndSoOn/vcruntime140d.dll">vcruntime140d.dll</a></li>
+<li><a href="https://github.com/LetMeFly666/FP-growth/releases/download/DLLs%2CstaticFilesAndSoOn/vcruntime140_1.dll">vcruntime140_1.dll</a></li>
+<li><a href="https://github.com/LetMeFly666/FP-growth/releases/download/DLLs%2CstaticFilesAndSoOn/vcruntime140_1d.dll">vcruntime140_1d.dll</a></li>
+</details>
+
+<details>
+<summary>v1.0.1</summary>
+<li><a href="https://github.com/LetMeFly666/FP-growth/releases/download/v1.0.1/FP-growth-v1.0.1-x64-Release.exe">FP-growth-v1.0.1-x64-Release.exe</a></li>
+<li><a href="https://download.fastgit.org/LetMeFly666/FP-growth/releases/download/v1.0.1/FP-growth-v1.0.1-x64-Release.exe">FP-growth-v1.0.1-x64-Release.exe</a>镜像地址</li>
+<li><a href="https://github.com/LetMeFly666/FP-growth/releases/download/v1.0.1/FP-growth-v1.0.1-x64-Release-WithDLLs.zip">FP-growth-v1.0.1-x64-Release-WithDLLs.zip</a></li>
+<li><a href="https://github.com/LetMeFly666/FP-growth/releases/download/v1.0.1/FP-growth-v1.0.1-x64-Debug.exe">FP-growth-v1.0.1-x64-Debug.exe</a></li>
+<li><a href="https://github.com/LetMeFly666/FP-growth/releases/download/v1.0.1/FP-growth-v1.0.1-x64-Release-WithDLLs.zip">FP-growth-v1.0.1-x64-Release-WithDLLs.zip</a></li>
+<li><a href="https://github.com/LetMeFly666/FP-growth/releases/download/v1.0.1/FP-growth-v1.0.1-x86-Release.exe">FP-growth-v1.0.1-x86-Release.exe</a></li>
+<li><a href="https://github.com/LetMeFly666/FP-growth/releases/download/v1.0.1/FP-growth-v1.0.1-x86-Release-WithDLLs.zip">FP-growth-v1.0.1-x86-Release-WithDLLs.zip</a></li>
+<li><a href="https://github.com/LetMeFly666/FP-growth/releases/download/v1.0.1/FP-growth-v1.0.1-x86-Debug.exe">FP-growth-v1.0.1-x86-Debug.exe</a></li>
+<li><a href="https://github.com/LetMeFly666/FP-growth/releases/download/v1.0.1/FP-growth-v1.0.1-x86-Debug-WithDLLs.zip">FP-growth-v1.0.1-x86-Debug-WithDLLs.zip</a></li>
+
+</details>
