@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-14 21:20:35
+ * @LastEditTime: 2022-04-15 11:10:32
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -13,6 +13,7 @@
 #include <vector>
 #include <queue>
 #include <map>
+#include <assert.h>
 #include <ctime>
 using namespace std;
 #define dbg(x) cout << #x << " = " << x << endl
@@ -302,7 +303,7 @@ void buildTree(Database& database, FP_Tree& fpTree) {
 }
 
 /* 通过[树&前缀]进行数据挖掘 */
-void digData(FP_Tree& fpTree, vector<Item> prefix) {
+void digData_0(FP_Tree& fpTree, vector<Item> prefix) {
     debug_buildTree_Tree(fpTree);  //**********
     auto ifIsSinglePath = [&fpTree]() {
         Node* root = fpTree.root;
@@ -366,6 +367,64 @@ void digData(FP_Tree& fpTree, vector<Item> prefix) {
             FP_Tree newFPTree;
             buildTree(database, newFPTree);
             digData(newFPTree, thisPrefix);
+        }
+    }
+}
+
+/* 通过[树&前缀]进行数据挖掘 */
+void digData(FP_Tree& fpTree, vector<Item> prefix) {
+    if (fpTree.root->childs.empty())
+        return;
+    const auto ifSinglePath = [](FP_Tree& fpTree) {
+        Node* p = fpTree.root;
+        while (true) {
+            if (p->childs.size() == 0)
+                break;
+            else if (p->childs.size() == 1) {
+                p = p->childs.begin()->second;
+            }
+            else {
+                return false;
+            }
+        }
+        return true;
+    };
+    if (ifSinglePath(fpTree)) {
+        Items nodesInTree;
+        int minAppendTime = 1e9;
+        Node* p = fpTree.root->childs.begin()->second;
+        while (true) {
+            nodesInTree.push_back(p->item);
+            minAppendTime = min(minAppendTime, p->appendTime);
+            if (p->childs.size())
+                p = p->childs.begin()->second;
+        }
+        for (int state = 1; state < (1 << nodesInTree.size()); state++) {
+            Items items = prefix;
+            for (int i = 0; i < nodesInTree.size(); i++) {
+                if (state & (1 << i)) {
+                    prefix.push_back(nodesInTree[i]);
+                }
+            }
+            assert(minAppendTime >= minSupportNum);
+            frequentItemsets.push_back({items, minAppendTime});
+        }
+    }
+    else {
+        for (auto &[item, nodes] : fpTree.headTable) {
+            Items thisPrefix = prefix;
+            thisPrefix.push_back(item);
+            Database thisDatabase;
+            for (Node* p = nodes.first; p; p = p->next) {
+                Items thisTransaction;
+                for (Node* node = p->father; node != fpTree.root; node = node->father) {
+                    thisTransaction.push_back(node->item);
+                }
+                thisDatabase.push_back({thisTransaction, p->appendTime});
+            }
+            FP_Tree newTree;
+            buildTree(thisDatabase, newTree);
+            digData(newTree, thisPrefix);
         }
     }
 }
