@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-15 18:53:43
+ * @LastEditTime: 2022-04-15 20:07:04
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -74,7 +74,7 @@ void digData(FP_Tree& fpTree, vector<Item> prefix);
 template <class T>
 void debug_vector(vector<T> v);
 void debug_buildTree_Tree_OneTree(FP_Tree& fpTree);
-string debug_buildTree_generateTreeCode(FP_Tree& fpTree, string nameId);
+string debug_buildTree_generateTreeCode(FP_Tree& fpTree, string nameId, Items prefix = {}, bool showFound = false);
 void debug_buildTree_toFile(string middle);
 
 
@@ -315,7 +315,10 @@ void buildTree(Database& database, FP_Tree& fpTree) {
 void digData(FP_Tree& fpTree, vector<Item> prefix) {
     int thisVisualizeTime = visualizeTime;
     if (ifDebug) {
-        visualizeMiddle += debug_buildTree_generateTreeCode(fpTree, to_string(visualizeTime++));
+        visualizeMiddle += debug_buildTree_generateTreeCode(fpTree, to_string(visualizeTime++), prefix, true);
+        if (fpTree.root->childs.empty()) {
+            visualizeMiddle += to_string(thisVisualizeTime) + "_NoGenerat[Empty]\n";
+        }
     }
     if (fpTree.root->childs.empty())
         return;
@@ -345,6 +348,9 @@ void digData(FP_Tree& fpTree, vector<Item> prefix) {
             else
                 break;
         }
+        if (ifDebug) {
+            visualizeMiddle += to_string(thisVisualizeTime) + "_NoGenerat[\"";
+        }
         for (int state = 1; state < (1 << nodesInTree.size()); state++) {
             Items items = prefix;
             for (int i = 0; i < nodesInTree.size(); i++) {
@@ -354,6 +360,23 @@ void digData(FP_Tree& fpTree, vector<Item> prefix) {
             }
             assert(minAppendTime >= minSupportNum);
             frequentItemsets.push_back({items, minAppendTime});
+            if (ifDebug) {
+                if (state != 1)
+                    visualizeMiddle += "<br>";
+                visualizeMiddle += "{";
+                bool firstPrint = true;
+                for (Item item : items) {
+                    if (firstPrint)
+                        firstPrint = false;
+                    else
+                        visualizeMiddle += ", ";
+                    visualizeMiddle += (char)(item + 'a');
+                }
+                visualizeMiddle += "} x " + to_string(minAppendTime);
+            }
+        }
+        if (ifDebug) {
+            visualizeMiddle += "\"]\n";
         }
     }
     else {
@@ -374,6 +397,7 @@ void digData(FP_Tree& fpTree, vector<Item> prefix) {
                 visualizeMiddle += to_string(thisVisualizeTime) + " -- ";
                 visualizeMiddle += (char)(item + 'a');
                 visualizeMiddle += " --> " + to_string(visualizeTime) + "\n";
+                visualizeMiddle += to_string(thisVisualizeTime) + "_NoGenerat[recurse]\n";
             }
             digData(newTree, thisPrefix);
         }
@@ -466,11 +490,30 @@ void debug_buildTree_Tree_OneTree(FP_Tree& fpTree) {
 }
 
 /* 生成树的可视化代码 */
-string debug_buildTree_generateTreeCode(FP_Tree& fpTree, string nameId) {
+string debug_buildTree_generateTreeCode(FP_Tree& fpTree, string nameId, Items prefix, bool showFound) {
     string middle = "subgraph " + nameId + "\n";
     middle += nameId + "_Root((Root))\n";
+    if (prefix.size()) {
+        middle += "subgraph " + nameId + "_prefix[prefix]\n";
+        middle += nameId + "Prefix[\"{";
+        bool firstPrint = true;
+        for (Item item : prefix) {
+            if (firstPrint)
+                firstPrint = false;
+            else
+                middle += ", ";
+            middle += (char)(item + 'a');
+        }
+        middle += "}\"]\n";
+        middle += "end\n";
+    }
+    if (showFound) {
+        middle += "subgraph " + nameId + "_generat[generat]\n";
+        middle += nameId + "_NoGenerat\n";
+        middle += "end\n";
+    }
     // headTable
-    middle += "subgraph " + nameId + " Head Table\n";
+    middle += "subgraph " + nameId + " Head Table[Head Table]\n";
     for (auto [item, nodes] : fpTree.headTable) {
         middle += nameId + "_HeadNode" + to_string(item) + "((" + (char)(item + 'a') + " : ";
         int cnt = 0;

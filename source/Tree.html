@@ -2,7 +2,10 @@
 flowchart LR
 subgraph 0
 0_Root((Root))
-subgraph 0 Head Table
+subgraph 0_generat[generat]
+0_NoGenerat
+end
+subgraph 0 Head Table[Head Table]
 0_HeadNode0((a : 14))
 0_HeadNode1((b : 7))
 0_HeadNode2((c : 6))
@@ -25,25 +28,48 @@ end
 0_HeadNode3 -..->0_2
 end
 0 -- a --> 1
+0_NoGenerat[recurse]
 subgraph 1
 1_Root((Root))
-subgraph 1 Head Table
+subgraph 1_prefix[prefix]
+1Prefix["{a}"]
+end
+subgraph 1_generat[generat]
+1_NoGenerat
+end
+subgraph 1 Head Table[Head Table]
 end
 end
+1_NoGenerat[Empty]
 0 -- b --> 2
+0_NoGenerat[recurse]
 subgraph 2
 2_Root((Root))
-subgraph 2 Head Table
+subgraph 2_prefix[prefix]
+2Prefix["{b}"]
+end
+subgraph 2_generat[generat]
+2_NoGenerat
+end
+subgraph 2 Head Table[Head Table]
 2_HeadNode0((a : 7))
 end
 2_0((a : 7))
 2_Root --> 2_0
 2_HeadNode0 -..->2_0
 end
+2_NoGenerat["{b, a} x 7"]
 0 -- c --> 3
+0_NoGenerat[recurse]
 subgraph 3
 3_Root((Root))
-subgraph 3 Head Table
+subgraph 3_prefix[prefix]
+3Prefix["{c}"]
+end
+subgraph 3_generat[generat]
+3_NoGenerat
+end
+subgraph 3 Head Table[Head Table]
 3_HeadNode0((a : 6))
 3_HeadNode1((b : 3))
 3_HeadNode3((d : 3))
@@ -59,39 +85,71 @@ end
 3_HeadNode3 -..->3_2
 end
 3 -- a --> 4
+3_NoGenerat[recurse]
 subgraph 4
 4_Root((Root))
-subgraph 4 Head Table
+subgraph 4_prefix[prefix]
+4Prefix["{c, a}"]
+end
+subgraph 4_generat[generat]
+4_NoGenerat
+end
+subgraph 4 Head Table[Head Table]
 end
 end
+4_NoGenerat[Empty]
 3 -- b --> 5
+3_NoGenerat[recurse]
 subgraph 5
 5_Root((Root))
-subgraph 5 Head Table
+subgraph 5_prefix[prefix]
+5Prefix["{c, b}"]
+end
+subgraph 5_generat[generat]
+5_NoGenerat
+end
+subgraph 5 Head Table[Head Table]
 5_HeadNode0((a : 3))
 end
 5_0((a : 3))
 5_Root --> 5_0
 5_HeadNode0 -..->5_0
 end
+5_NoGenerat["{c, b, a} x 3"]
 3 -- d --> 6
+3_NoGenerat[recurse]
 subgraph 6
 6_Root((Root))
-subgraph 6 Head Table
+subgraph 6_prefix[prefix]
+6Prefix["{c, d}"]
+end
+subgraph 6_generat[generat]
+6_NoGenerat
+end
+subgraph 6 Head Table[Head Table]
 6_HeadNode0((a : 3))
 end
 6_0((a : 3))
 6_Root --> 6_0
 6_HeadNode0 -..->6_0
 end
+6_NoGenerat["{c, d, a} x 3"]
 0 -- d --> 7
+0_NoGenerat[recurse]
 subgraph 7
 7_Root((Root))
-subgraph 7 Head Table
+subgraph 7_prefix[prefix]
+7Prefix["{d}"]
+end
+subgraph 7_generat[generat]
+7_NoGenerat
+end
+subgraph 7 Head Table[Head Table]
 7_HeadNode0((a : 7))
 end
 7_0((a : 7))
 7_Root --> 7_0
 7_HeadNode0 -..->7_0
 end
+7_NoGenerat["{d, a} x 7"]
 </div><script src="./mermaid.min.js"></script><script>mermaid.initialize({theme: 'forest',logLevel: 3,securityLevel: 'loose',flowchart: { curve: 'basis' },});</script></body></html>
