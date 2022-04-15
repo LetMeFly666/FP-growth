@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-14 21:03:24
+ * @LastEditTime: 2022-04-14 21:20:35
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -303,6 +303,7 @@ void buildTree(Database& database, FP_Tree& fpTree) {
 
 /* 通过[树&前缀]进行数据挖掘 */
 void digData(FP_Tree& fpTree, vector<Item> prefix) {
+    debug_buildTree_Tree(fpTree);  //**********
     auto ifIsSinglePath = [&fpTree]() {
         Node* root = fpTree.root;
         while (root) {
@@ -442,7 +443,7 @@ void debug_vector(vector<T> v) {
 /* 打印FP-Tree */
 void debug_buildTree_Tree(FP_Tree& fpTree) {
     string head = "<html><head></head><body><div class=\"mermaid\">\ngraph TD\nRoot((Root))\n";
-    string tail = "\n</div></div><script src=\"./mermaid.min.js\"></script><script>mermaid.initialize({theme: 'forest',logLevel: 3,securityLevel: 'loose',flowchart: { curve: 'basis' },});</script></body></html>";
+    string tail = "</div></div><script src=\"./mermaid.min.js\"></script><script>mermaid.initialize({theme: 'forest',logLevel: 3,securityLevel: 'loose',flowchart: { curve: 'basis' },});</script></body></html>";
     string middle;
     // headTable
     middle += "subgraph Head Table\n";
@@ -496,7 +497,6 @@ int main(int argc, char** argv) {
     get1Itemset(database);
     FP_Tree fpTree;
     buildTree(database, fpTree);
-    debug_buildTree_Tree(fpTree);
     digData(fpTree, {});
     
     clock_t end = clock();
