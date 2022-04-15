@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-15 11:10:32
+ * @LastEditTime: 2022-04-15 11:13:19
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -398,12 +398,14 @@ void digData(FP_Tree& fpTree, vector<Item> prefix) {
             minAppendTime = min(minAppendTime, p->appendTime);
             if (p->childs.size())
                 p = p->childs.begin()->second;
+            else
+                break;
         }
         for (int state = 1; state < (1 << nodesInTree.size()); state++) {
             Items items = prefix;
             for (int i = 0; i < nodesInTree.size(); i++) {
                 if (state & (1 << i)) {
-                    prefix.push_back(nodesInTree[i]);
+                    items.push_back(nodesInTree[i]);
                 }
             }
             assert(minAppendTime >= minSupportNum);
