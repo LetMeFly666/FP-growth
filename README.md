@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:40:57
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-15 14:05:43
+ * @LastEditTime: 2022-04-15 16:11:19
 -->
 # FP-growth
 
@@ -56,3 +56,7 @@ FP-growth[.exe] [-i DATANAME] [-s SUPPORT] [-o RESULT] [-h] [-p]
 | ```5``` | 不合法支持度 | 支持度输入不合法：%位置没有出现在支持度最后 |
 | ```6``` | 不合法支持度 | 支持度输入不合法：.位置不合法或出现了不只一个. |
 | ```7``` | 不合法支持度 | 支持度输入不合法：百分比方法且出现其他不合法字符 |
+
+### Example
+
++ ```fp-growth -i source/min2.dat -s 3 -d```

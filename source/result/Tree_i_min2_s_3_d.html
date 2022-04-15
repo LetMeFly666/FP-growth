@@ -1,0 +1,63 @@
+<html><head></head><body><div class="mermaid">
+flowchart LR
+subgraph 0
+0_Root((Root))
+subgraph 0 Head Table
+0_HeadNode0((a : 10))
+0_HeadNode1((b : 5))
+0_HeadNode2((c : 4))
+0_HeadNode3((d : 5))
+end
+0_0((a : 10))
+0_Root --> 0_0
+0_1((b : 5))
+0_0 --> 0_1
+0_2((d : 5))
+0_0 --> 0_2
+0_3((c : 2))
+0_1 --> 0_3
+0_4((c : 2))
+0_2 --> 0_4
+0_HeadNode0 -..->0_0
+0_HeadNode1 -..->0_1
+0_HeadNode2 -..->0_3
+0_3 -..-> 0_4
+0_HeadNode3 -..->0_2
+end
+0 -- a --> 1
+subgraph 1
+1_Root((Root))
+subgraph 1 Head Table
+end
+end
+0 -- b --> 2
+subgraph 2
+2_Root((Root))
+subgraph 2 Head Table
+2_HeadNode0((a : 5))
+end
+2_0((a : 5))
+2_Root --> 2_0
+2_HeadNode0 -..->2_0
+end
+0 -- c --> 3
+subgraph 3
+3_Root((Root))
+subgraph 3 Head Table
+3_HeadNode0((a : 4))
+end
+3_0((a : 4))
+3_Root --> 3_0
+3_HeadNode0 -..->3_0
+end
+0 -- d --> 4
+subgraph 4
+4_Root((Root))
+subgraph 4 Head Table
+4_HeadNode0((a : 5))
+end
+4_0((a : 5))
+4_Root --> 4_0
+4_HeadNode0 -..->4_0
+end
+</div><script src="./mermaid.min.js"></script><script>mermaid.initialize({theme: 'forest',logLevel: 3,securityLevel: 'loose',flowchart: { curve: 'basis' },});</script></body></html>
