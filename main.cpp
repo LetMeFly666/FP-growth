@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-24 13:27:16
+ * @LastEditTime: 2022-04-24 14:28:48
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -21,8 +21,6 @@ using namespace std;
 
 #define SlowExit(toSay, errCode) {cerr << toSay << endl; Sleep(725); exit(errCode);}
 #define EXIT1IFNOANOTHERPARAMETR if (i + 1 >= argc) SlowExit("[0]: Parameter not enough", 1)  // 如果参数个数不足就exit(1)
-
-int cnt[100] = {0};  // cnt[i]：i项集
 
 
 class Node;
@@ -269,15 +267,7 @@ void analyMinSupportNum(string minSupportInput, Database& database) {
 
 /* 展示结果 */
 void showResult() {
-    // printf("frequent item sets 's size is: %d\n", frequentItemsets.size());
-    int ans = 0;
-    for (int i = 1; i < 100; i++) {
-        if (cnt[i]) {
-            printf("%d: %d\n", i, cnt[i]);
-            ans += cnt[i];
-        }
-    }
-    printf("Sum: %d\n", ans);
+    printf("frequent item sets 's size is: %d\n", frequentItemsets.size());
     for (ItemWithTime& transaction : frequentItemsets) {
         printf("{");
         bool firstPrint = true;
@@ -322,14 +312,14 @@ void buildTree(Database& database, FP_Tree& fpTree) {
 }
 
 /* 通过[树&前缀]进行数据挖掘 */
-void digData(FP_Tree& fpTree, int prefix) {
+void digData(FP_Tree& fpTree, vector<Item> prefix) {
     int thisVisualizeTime = visualizeTime;
-    // if (ifDebug) {
-    //     visualizeMiddle += debug_buildTree_generateTreeCode(fpTree, to_string(visualizeTime++), prefix, true);
-    //     if (fpTree.root->childs.empty()) {
-    //         visualizeMiddle += to_string(thisVisualizeTime) + "_NoGenerat[Empty]\n";
-    //     }
-    // }
+    if (ifDebug) {
+        visualizeMiddle += debug_buildTree_generateTreeCode(fpTree, to_string(visualizeTime++), prefix, true);
+        if (fpTree.root->childs.empty()) {
+            visualizeMiddle += to_string(thisVisualizeTime) + "_NoGenerat[Empty]\n";
+        }
+    }
     if (fpTree.root->childs.empty())
         return;
     const auto ifSinglePath = [](FP_Tree& fpTree) {
@@ -362,37 +352,37 @@ void digData(FP_Tree& fpTree, int prefix) {
             visualizeMiddle += to_string(thisVisualizeTime) + "_NoGenerat[\"";
         }
         for (int state = 1; state < (1 << nodesInTree.size()); state++) {
-            int items = prefix;
+            Items items = prefix;
             for (int i = 0; i < nodesInTree.size(); i++) {
                 if (state & (1 << i)) {
-                    items++;
+                    items.push_back(nodesInTree[i]);
                 }
             }
-            // frequentItemsets.push_back({items, minAppendTime});
-            cnt[items]++;
-            // if (ifDebug) {
-            //     if (state != 1)
-            //         visualizeMiddle += "<br>";
-            //     visualizeMiddle += "{";
-            //     bool firstPrint = true;
-            //     for (Item item : items) {
-            //         if (firstPrint)
-            //             firstPrint = false;
-            //         else
-            //             visualizeMiddle += ", ";
-            //         visualizeMiddle += (char)(item + 'a');
-            //     }
-            //     visualizeMiddle += "} x " + to_string(minAppendTime);
-            // }
+            assert(minAppendTime >= minSupportNum);
+            frequentItemsets.push_back({items, minAppendTime});
+            if (ifDebug) {
+                if (state != 1)
+                    visualizeMiddle += "<br>";
+                visualizeMiddle += "{";
+                bool firstPrint = true;
+                for (Item item : items) {
+                    if (firstPrint)
+                        firstPrint = false;
+                    else
+                        visualizeMiddle += ", ";
+                    visualizeMiddle += (char)(item + 'a');
+                }
+                visualizeMiddle += "} x " + to_string(minAppendTime);
+            }
         }
-        // if (ifDebug) {
-        //     visualizeMiddle += "\"]\n";
-        // }
+        if (ifDebug) {
+            visualizeMiddle += "\"]\n";
+        }
     }
     else {
         for (auto &[item, nodes] : fpTree.headTable) {
-            int thisPrefix = prefix;
-            thisPrefix++;
+            Items thisPrefix = prefix;
+            thisPrefix.push_back(item);
             Database thisDatabase;
             for (Node* p = nodes.first; p; p = p->next) {
                 Items thisTransaction;
@@ -401,26 +391,25 @@ void digData(FP_Tree& fpTree, int prefix) {
                 }
                 thisDatabase.push_back({thisTransaction, p->appendTime});
             }
-            // frequentItemsets.push_back({thisPrefix, nodes.first->appendTime});  // !!!注意，这个也要作为结果
-            cnt[thisPrefix]++;
+            frequentItemsets.push_back({thisPrefix, nodes.first->appendTime});  // !!!注意，这个也要作为结果
             FP_Tree newTree;
             buildTree(thisDatabase, newTree);
-            // if (ifDebug) {
-            //     visualizeMiddle += to_string(thisVisualizeTime) + " -- ";
-            //     visualizeMiddle += (char)(item + 'a');
-            //     visualizeMiddle += " --> " + to_string(visualizeTime) + "\n";
-            //     visualizeMiddle += to_string(thisVisualizeTime) + "_NoGenerat[\"{";
-            //     bool firstPrint = true;
-            //     for (Item item : prefix) {
-            //         if (firstPrint)
-            //             firstPrint = false;
-            //         else
-            //             visualizeMiddle += ", ";
-            //         visualizeMiddle += (char)(item + 'a');
-            //     }
-            //     visualizeMiddle += "} x " + to_string(nodes.first->appendTime);
-            //     visualizeMiddle += "\"]\n";
-            // }
+            if (ifDebug) {
+                visualizeMiddle += to_string(thisVisualizeTime) + " -- ";
+                visualizeMiddle += (char)(item + 'a');
+                visualizeMiddle += " --> " + to_string(visualizeTime) + "\n";
+                visualizeMiddle += to_string(thisVisualizeTime) + "_NoGenerat[\"{";
+                bool firstPrint = true;
+                for (Item item : prefix) {
+                    if (firstPrint)
+                        firstPrint = false;
+                    else
+                        visualizeMiddle += ", ";
+                    visualizeMiddle += (char)(item + 'a');
+                }
+                visualizeMiddle += "} x " + to_string(nodes.first->appendTime);
+                visualizeMiddle += "\"]\n";
+            }
             digData(newTree, thisPrefix);
         }
     }
@@ -578,6 +567,58 @@ string debug_buildTree_generateTreeCode(FP_Tree& fpTree, string nameId, Items pr
     return middle;
 }
 
+void GuanLian() {
+    double guanLianPercent;
+    cout << "input guanlianpercent: ";
+    scanf("%lf%%", &guanLianPercent);
+    guanLianPercent /= 100;
+    frequentItemsets;
+    map<Items, int> ma;
+    for (ItemWithTime& itemWithTime : frequentItemsets) {
+        sort(itemWithTime.first.begin(), itemWithTime.first.end());
+        ma[itemWithTime.first] = itemWithTime.second;
+    }
+    vector<pair<Items, Items>> guanLianAns;
+    for (ItemWithTime& ItemWithTime : frequentItemsets) {
+        Items items = ItemWithTime.first;
+        int itemN = items.size();
+        for (int i = 1; i + 1 < (1LL << itemN); i++) {
+            Items smallItem;
+            for (int j = 0; j < itemN; j++) {
+                if (i & (1 << j)) {
+                    smallItem.push_back(items[j]);
+                }
+            }
+            sort(smallItem.begin(), smallItem.end());
+            double thisConfidence = 1. * ma[items] / ma[smallItem];
+            if (thisConfidence >= guanLianPercent) {
+                guanLianAns.push_back({items, smallItem});
+            }
+        }
+    }
+    cout << "Have " << guanLianAns.size() << " in total" << endl;
+    auto prtItem = [](Items& items) {
+        putchar('{');
+        bool first = true;
+        for (Item item : items) {
+            if (first)
+                first = false;
+            else
+                putchar(' ');
+            cout << item;
+        }
+        putchar('}');
+    };
+    for (auto [bigItem, smallItem] : guanLianAns) {
+        prtItem(bigItem);
+        printf(" / ");
+        prtItem(smallItem);
+        printf(" : ");
+        cout << 1. * ma[bigItem] / ma[smallItem] << endl;
+    }
+
+}
+
 int main(int argc, char** argv) {
     Database database;
     init(argc, argv, database);
@@ -590,6 +631,8 @@ int main(int argc, char** argv) {
     clock_t end = clock();
     cerr << "Time consumed: " << (double)(end - start) / CLK_TCK << "s" << endl;
     showResult();
+
+    GuanLian();
 
     if (ifDebug) {
         debug_buildTree_toFile(visualizeMiddle);
