@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-24 11:19:27
+ * @LastEditTime: 2022-04-24 11:39:16
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -270,11 +270,14 @@ void analyMinSupportNum(string minSupportInput, Database& database) {
 /* 展示结果 */
 void showResult() {
     printf("frequent item sets 's size is: %d\n", frequentItemsets.size());
+    int ans = 0;
     for (int i = 1; i < 10; i++) {
         if (cnt[i]) {
             printf("%d: %d\n", i, cnt[i]);
+            ans += cnt[i];
         }
     }
+    printf("Sum: %d\n", ans);
     for (ItemWithTime& transaction : frequentItemsets) {
         printf("{");
         bool firstPrint = true;
