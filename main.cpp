@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-24 12:49:13
+ * @LastEditTime: 2022-04-24 13:27:16
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -162,7 +162,7 @@ void input(Database& database) {  // 读入数据
             if (c >= '0' && c <= '9') {
                 num *= 10;
                 num += c - '0';
-                lastIsNum = true;
+                lastIsNum = true; 
             }
             else {
                 if (lastIsNum) {
