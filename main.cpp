@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-15 21:03:55
+ * @LastEditTime: 2022-04-24 11:19:27
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -21,6 +21,8 @@ using namespace std;
 
 #define SlowExit(toSay, errCode) {cerr << toSay << endl; Sleep(725); exit(errCode);}
 #define EXIT1IFNOANOTHERPARAMETR if (i + 1 >= argc) SlowExit("[0]: Parameter not enough", 1)  // 如果参数个数不足就exit(1)
+
+int cnt[10] = {0};  // cnt[i]：i项集
 
 
 class Node;
@@ -268,6 +270,11 @@ void analyMinSupportNum(string minSupportInput, Database& database) {
 /* 展示结果 */
 void showResult() {
     printf("frequent item sets 's size is: %d\n", frequentItemsets.size());
+    for (int i = 1; i < 10; i++) {
+        if (cnt[i]) {
+            printf("%d: %d\n", i, cnt[i]);
+        }
+    }
     for (ItemWithTime& transaction : frequentItemsets) {
         printf("{");
         bool firstPrint = true;
@@ -312,14 +319,14 @@ void buildTree(Database& database, FP_Tree& fpTree) {
 }
 
 /* 通过[树&前缀]进行数据挖掘 */
-void digData(FP_Tree& fpTree, vector<Item> prefix) {
+void digData(FP_Tree& fpTree, int prefix) {
     int thisVisualizeTime = visualizeTime;
-    if (ifDebug) {
-        visualizeMiddle += debug_buildTree_generateTreeCode(fpTree, to_string(visualizeTime++), prefix, true);
-        if (fpTree.root->childs.empty()) {
-            visualizeMiddle += to_string(thisVisualizeTime) + "_NoGenerat[Empty]\n";
-        }
-    }
+    // if (ifDebug) {
+    //     visualizeMiddle += debug_buildTree_generateTreeCode(fpTree, to_string(visualizeTime++), prefix, true);
+    //     if (fpTree.root->childs.empty()) {
+    //         visualizeMiddle += to_string(thisVisualizeTime) + "_NoGenerat[Empty]\n";
+    //     }
+    // }
     if (fpTree.root->childs.empty())
         return;
     const auto ifSinglePath = [](FP_Tree& fpTree) {
@@ -352,37 +359,37 @@ void digData(FP_Tree& fpTree, vector<Item> prefix) {
             visualizeMiddle += to_string(thisVisualizeTime) + "_NoGenerat[\"";
         }
         for (int state = 1; state < (1 << nodesInTree.size()); state++) {
-            Items items = prefix;
+            int items = prefix;
             for (int i = 0; i < nodesInTree.size(); i++) {
                 if (state & (1 << i)) {
-                    items.push_back(nodesInTree[i]);
+                    items++;
                 }
             }
-            assert(minAppendTime >= minSupportNum);
-            frequentItemsets.push_back({items, minAppendTime});
-            if (ifDebug) {
-                if (state != 1)
-                    visualizeMiddle += "<br>";
-                visualizeMiddle += "{";
-                bool firstPrint = true;
-                for (Item item : items) {
-                    if (firstPrint)
-                        firstPrint = false;
-                    else
-                        visualizeMiddle += ", ";
-                    visualizeMiddle += (char)(item + 'a');
-                }
-                visualizeMiddle += "} x " + to_string(minAppendTime);
-            }
+            // frequentItemsets.push_back({items, minAppendTime});
+            cnt[items]++;
+            // if (ifDebug) {
+            //     if (state != 1)
+            //         visualizeMiddle += "<br>";
+            //     visualizeMiddle += "{";
+            //     bool firstPrint = true;
+            //     for (Item item : items) {
+            //         if (firstPrint)
+            //             firstPrint = false;
+            //         else
+            //             visualizeMiddle += ", ";
+            //         visualizeMiddle += (char)(item + 'a');
+            //     }
+            //     visualizeMiddle += "} x " + to_string(minAppendTime);
+            // }
         }
-        if (ifDebug) {
-            visualizeMiddle += "\"]\n";
-        }
+        // if (ifDebug) {
+        //     visualizeMiddle += "\"]\n";
+        // }
     }
     else {
         for (auto &[item, nodes] : fpTree.headTable) {
-            Items thisPrefix = prefix;
-            thisPrefix.push_back(item);
+            int thisPrefix = prefix;
+            thisPrefix++;
             Database thisDatabase;
             for (Node* p = nodes.first; p; p = p->next) {
                 Items thisTransaction;
@@ -391,25 +398,26 @@ void digData(FP_Tree& fpTree, vector<Item> prefix) {
                 }
                 thisDatabase.push_back({thisTransaction, p->appendTime});
             }
-            frequentItemsets.push_back({thisPrefix, nodes.first->appendTime});  // !!!注意，这个也要作为结果
+            // frequentItemsets.push_back({thisPrefix, nodes.first->appendTime});  // !!!注意，这个也要作为结果
+            cnt[thisPrefix]++;
             FP_Tree newTree;
             buildTree(thisDatabase, newTree);
-            if (ifDebug) {
-                visualizeMiddle += to_string(thisVisualizeTime) + " -- ";
-                visualizeMiddle += (char)(item + 'a');
-                visualizeMiddle += " --> " + to_string(visualizeTime) + "\n";
-                visualizeMiddle += to_string(thisVisualizeTime) + "_NoGenerat[\"{";
-                bool firstPrint = true;
-                for (Item item : prefix) {
-                    if (firstPrint)
-                        firstPrint = false;
-                    else
-                        visualizeMiddle += ", ";
-                    visualizeMiddle += (char)(item + 'a');
-                }
-                visualizeMiddle += "} x " + to_string(nodes.first->appendTime);
-                visualizeMiddle += "\"]\n";
-            }
+            // if (ifDebug) {
+            //     visualizeMiddle += to_string(thisVisualizeTime) + " -- ";
+            //     visualizeMiddle += (char)(item + 'a');
+            //     visualizeMiddle += " --> " + to_string(visualizeTime) + "\n";
+            //     visualizeMiddle += to_string(thisVisualizeTime) + "_NoGenerat[\"{";
+            //     bool firstPrint = true;
+            //     for (Item item : prefix) {
+            //         if (firstPrint)
+            //             firstPrint = false;
+            //         else
+            //             visualizeMiddle += ", ";
+            //         visualizeMiddle += (char)(item + 'a');
+            //     }
+            //     visualizeMiddle += "} x " + to_string(nodes.first->appendTime);
+            //     visualizeMiddle += "\"]\n";
+            // }
             digData(newTree, thisPrefix);
         }
     }
