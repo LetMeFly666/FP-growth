@@ -1,0 +1,26 @@
+PS F:\OtherApps\Program\Git\Store\Store16_FP_growth> ./main.exe -i source/retail.dat -s 0.3% -o source/result/result_retail0.003.txt
+Time consumed: 1.25167s
+PS F:\OtherApps\Program\Git\Store\Store16_FP_growth> ./main.exe -i source/retail.dat -s 0.4% -o source/result/result_retail0.004.txt
+Time consumed: 1.027s
+PS F:\OtherApps\Program\Git\Store\Store16_FP_growth> ./main.exe -i source/retail.dat -s 0.5% -o source/result/result_retail0.005.txt
+Time consumed: 0.907667s
+PS F:\OtherApps\Program\Git\Store\Store16_FP_growth> ./main.exe -i source/retail.dat -s 0.6% -o source/result/result_retail0.006.txt 
+Time consumed: 0.852s
+PS F:\OtherApps\Program\Git\Store\Store16_FP_growth> ./main.exe -i source/retail.dat -s 0.7% -o source/result/result_retail0.007.txt
+Time consumed: 0.807333s
+PS F:\OtherApps\Program\Git\Store\Store16_FP_growth> ./main.exe -i source/retail.dat -s 0.8% -o source/result/result_retail0.008.txt
+Time consumed: 0.776667s
+PS F:\OtherApps\Program\Git\Store\Store16_FP_growth> ./main.exe -i source/retail.dat -s 0.9% -o source/result/result_retail0.009.txt
+Time consumed: 0.759667s
+PS F:\OtherApps\Program\Git\Store\Store16_FP_growth> ./main.exe -i source/retail.dat -s 1% -o source/result/result_retail0.01_2.txt
+Time consumed: 0.752333s
+PS F:\OtherApps\Program\Git\Store\Store16_FP_growth> ./main.exe -i source/retail.dat -s 2% -o source/result/result_retail0.02.txt
+Time consumed: 0.691s
+PS F:\OtherApps\Program\Git\Store\Store16_FP_growth> ./main.exe -i source/retail.dat -s 1% -o source/result/result_retail0.01.txt
+Time consumed: 0.731667s
+PS F:\OtherApps\Program\Git\Store\Store16_FP_growth> ./main.exe -i source/retail.dat -s 3% -o source/result/result_retail0.03.txt
+Time consumed: 0.684333s
+PS F:\OtherApps\Program\Git\Store\Store16_FP_growth> ./main.exe -i source/retail.dat -s 4% -o source/result/result_retail0.04.txt
+Time consumed: 0.674s
+PS F:\OtherApps\Program\Git\Store\Store16_FP_growth> ./main.exe -i source/retail.dat -s 5% -o source/result/result_retail0.05.txt
+Time consumed: 0.677667s
