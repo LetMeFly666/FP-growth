@@ -162,7 +162,7 @@ void input(Database& database) {  // 读入数据
             if (c >= '0' && c <= '9') {
                 num *= 10;
                 num += c - '0';
-                lastIsNum = true; 
+                lastIsNum = true;
             }
             else {
                 if (lastIsNum) {
