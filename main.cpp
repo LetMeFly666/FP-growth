@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-24 14:28:48
+ * @LastEditTime: 2022-04-24 15:34:06
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -16,6 +16,7 @@
 #include <map>
 #include <assert.h>
 #include <ctime>
+#include <set>
 using namespace std;
 #define dbg(x) cout << #x << " = " << x << endl
 
@@ -44,6 +45,8 @@ bool ifDebug = false;  // 是否debug
 string visualizeMiddle;  // 可视化树的中间代码
 int visualizeTime = 0;  // 可视化了几个树（为了对每个树使用不同的id）
 
+set<Item> se[88162];
+
 
 struct Node {
     Item item;
@@ -61,6 +64,7 @@ struct FP_Tree {
     HeadTable headTable;
 };
 
+Database firstDatabase;
 
 void init(int argc, char** argv, Database& database);
 void input(Database& database);
@@ -175,6 +179,7 @@ void input(Database& database) {  // 读入数据
         database.push_back({thisLog, 1});
     }
     istr.close();
+    firstDatabase = database;
 }
 
 /* 将输入的最小支持度(string)转为最小支持数(int) */
@@ -574,11 +579,35 @@ void GuanLian() {
     guanLianPercent /= 100;
     frequentItemsets;
     map<Items, int> ma;
+    int lines = firstDatabase.size();
+    // set<Item> se[lines];
+    int thisCnt = 0;
+    for (auto [items, timess] : firstDatabase) {
+        for (Item item : items) {
+            se[thisCnt].insert(item);
+        }
+        thisCnt++;
+    }
     for (ItemWithTime& itemWithTime : frequentItemsets) {
         sort(itemWithTime.first.begin(), itemWithTime.first.end());
-        ma[itemWithTime.first] = itemWithTime.second;
+        // ma[itemWithTime.first] = itemWithTime.second;
+        int cnt = 0;
+        for (int i = 0; i < lines; i++) {
+            bool cannot = false;
+            for (auto t : itemWithTime.first) {
+                if (!se[i].count(t)) {
+                    cannot = true;
+                    break;
+                }
+            }
+            if (!cannot)
+                cnt++;
+        }
+        ma[itemWithTime.first] = cnt;
     }
     vector<pair<Items, Items>> guanLianAns;
+    double maxSu = 0;
+    pair<Items, Items> ansnn;
     for (ItemWithTime& ItemWithTime : frequentItemsets) {
         Items items = ItemWithTime.first;
         int itemN = items.size();
@@ -591,8 +620,12 @@ void GuanLian() {
             }
             sort(smallItem.begin(), smallItem.end());
             double thisConfidence = 1. * ma[items] / ma[smallItem];
-            if (thisConfidence >= guanLianPercent) {
+            if (thisConfidence >= guanLianPercent/* && thisConfidence <= 1*/) {
                 guanLianAns.push_back({items, smallItem});
+                if (maxSu < thisConfidence) {
+                    maxSu = thisConfidence;
+                    ansnn = {items, smallItem};
+                }
             }
         }
     }
@@ -609,6 +642,7 @@ void GuanLian() {
         }
         putchar('}');
     };
+    
     for (auto [bigItem, smallItem] : guanLianAns) {
         prtItem(bigItem);
         printf(" / ");
@@ -616,6 +650,10 @@ void GuanLian() {
         printf(" : ");
         cout << 1. * ma[bigItem] / ma[smallItem] << endl;
     }
+
+    cout << maxSu << endl;
+    prtItem(ansnn.first);
+    prtItem(ansnn.second);
 
 }
 
