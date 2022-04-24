@@ -2,7 +2,7 @@
  * @Author: LetMeFly
  * @Date: 2022-04-10 09:43:22
  * @LastEditors: LetMeFly
- * @LastEditTime: 2022-04-24 11:47:21
+ * @LastEditTime: 2022-04-24 12:49:13
  */
 #include <windows.h>  // Sleep
 #include <algorithm>
@@ -22,7 +22,7 @@ using namespace std;
 #define SlowExit(toSay, errCode) {cerr << toSay << endl; Sleep(725); exit(errCode);}
 #define EXIT1IFNOANOTHERPARAMETR if (i + 1 >= argc) SlowExit("[0]: Parameter not enough", 1)  // 如果参数个数不足就exit(1)
 
-int cnt[10] = {0};  // cnt[i]：i项集
+int cnt[100] = {0};  // cnt[i]：i项集
 
 
 class Node;
@@ -271,7 +271,7 @@ void analyMinSupportNum(string minSupportInput, Database& database) {
 void showResult() {
     // printf("frequent item sets 's size is: %d\n", frequentItemsets.size());
     int ans = 0;
-    for (int i = 1; i < 10; i++) {
+    for (int i = 1; i < 100; i++) {
         if (cnt[i]) {
             printf("%d: %d\n", i, cnt[i]);
             ans += cnt[i];
